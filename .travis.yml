@@ -1,12 +1,19 @@
 language: python
 
-python:
-  - "3.6"
+matrix:
+    include:
+        - os: linux
+          sudo: required
+          python: 3.6
+          env: TOXENV=py32
+        - os: windows
+          python: 3.6
+          env: TOXENV=py36
+        - os: osx
+          language: generic
+          env: TOXENV=3.6.2
 
 install:
   - pip install -r dependencies.txt
 
-os:
-  - linux
-  - windows
-
+script: make test
