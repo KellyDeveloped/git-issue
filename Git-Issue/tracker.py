@@ -8,14 +8,15 @@ class Tracker(object):
     ISSUE_IDENTIFIER = "ISSUE"
     path = os.path.normpath(os.getcwd() + "/tracker.json")
 
-    def __init__(self):
-        self.issue_count = 0
+    def __init__(self, issue_count=0):
+        self.issue_count = issue_count
         
     def increment_issue_count(self):
         self.issue_count += 1
 
     def store_tracker(self):
-        JsonConvert.ToFile(self, path)
+
+        JsonConvert.ToFile(self, Tracker.path)
 
     @classmethod
     def obtain_tracker(cls):

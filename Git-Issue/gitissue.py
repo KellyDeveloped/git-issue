@@ -1,6 +1,10 @@
 #!/usr/bin/env python
 
 import argparse
+import jsonutils
+import issue_handler
+from issue import Issue
+from gituser import GitUser
 
 # Arguments start here
 parser = argparse.ArgumentParser(prog='git issue')
@@ -26,7 +30,27 @@ unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from a
 
 # Default methods for sub-parsers. These methods will be called when the keyword for the sub-parser is given.
 def create(args):
-    print("to be defined")
+    issue = Issue()
+    issue.id = issue_handler.generate_issue_id()
+    issue.summary = args.summary
+    issue.description = args.description
+    issue.assignee = GitUser(email=args.assignee) if args.assignee != None else None
+    issue.reporter = GitUser(email=args.reporter)
+    issue.subscribers.append(GitUser())
+
+    print("The following issue will be created:\n")
+    issue_handler.display_issue(issue)
+    create = input("\nConfirm creation (Y/N): ").capitalize()
+    
+    while create != "Y" and create != "YES" and create != "N" and create != "NO":
+        create = input("\nInvalid input, please try again (Y/N): ").capitalize()
+
+    if create == "Y" or create == "YES":
+        issue_handler.store_issue(issue)
+        print("{} created successfully.".format(issue.id))
+
+    else:
+        print("Issue creation cancelled.")
 
 def edit(args):
     print("to be defined")
@@ -69,10 +93,10 @@ showParser.add_argument('--issue', '-i', help='Displays the given issue.')
 showParser.set_defaults(func=show)
 
 
-subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.')
+subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
 subscribeParser.set_defaults(func=subscribe)
 
-unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.')
+unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.', required=True)
 unsubscribeParser.set_defaults(func=unsubscribe)
 
 args = parser.parse_args()

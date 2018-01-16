@@ -1,12 +1,15 @@
+import os
 from jsonutils import JsonConvert
 from tracker import Tracker
 
 def _increment_issue_count():
     tracker = Tracker.obtain_tracker()
     tracker.increment_issue_count()
+    tracker.store_tracker()
 
-def _generate_issue_id(issue):
-    raise NotImplementedError
+def generate_issue_id():
+    tracker = Tracker.obtain_tracker()
+    return "{}-{}".format(tracker.ISSUE_IDENTIFIER, (tracker.issue_count + 1))
 
 def does_issue_exist(id):
     raise NotImplementedError
@@ -18,7 +21,10 @@ def get_all_issues():
     raise NotImplementedError
 
 def store_issue(issue):
-    raise NotImplementedError
+    raw_path = os.getcwd() + "/{}.json".format(issue.id)
+    normalised_path = os.path.normpath(raw_path)
+    JsonConvert.ToFile(issue, normalised_path)
+    _increment_issue_count()
 
 def display_issue(issue):
     print ("Issue ID:\t{}".format(issue.id))
@@ -37,5 +43,3 @@ def display_issue(issue):
     print ("Subscribers:")
     for s in issue.subscribers:
         print ("\t{}, {}".format(issue.assignee.user, issue.assignee.email))
-
-_increment_issue_count()

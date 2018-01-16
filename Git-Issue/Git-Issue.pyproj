@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>e257338e-16d4-44ab-bf14-d9b17680cca1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>git-issue.py</StartupFile>
+    <StartupFile>gitissue.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -13,7 +13,7 @@
     <RootNamespace>Git-Issue</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>show --help</CommandLineArguments>
+    <CommandLineArguments>create --summary "Test Summary" --description "Yaldi, we even have a description!" --assignee "liamcairnskelly@googlemail.com"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -28,18 +28,23 @@
     <OutputPath>bin\Run\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Comment.py">
+    <Compile Include="comment.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="GitUser.py">
+    <Compile Include="gitissue.py" />
+    <Compile Include="gituser.py" />
+    <Compile Include="issue.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Issue.py">
+    <Compile Include="issue_handler.py">
       <SubType>Code</SubType>
     </Compile>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="git-issue.py" />
+    <Compile Include="jsonutils.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="tracker.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

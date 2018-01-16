@@ -1,6 +1,8 @@
-from GitUser import Gituser
-import Comment
+from gituser import GitUser
+from comment import Comment
+import jsonutils
 
+@jsonutils.JsonConvert.register
 class Issue(object):
     """This class encapsulates what an issue is, and provides utility methods to """
 
@@ -8,9 +10,9 @@ class Issue(object):
         self.id = ""
         self.summary = ""
         self.description = ""
-        self.comments = []
+        self.comments:[Comment] = []
         self.status = ""
-        self.assignee = GitUser()
-        self.reporter = GitUser()
-        self.subscribers = []
+        self.assignee:GitUser = None
+        self.reporter:GitUser = None
+        self.subscribers:[GitUser] = []
         self.attachments = []
