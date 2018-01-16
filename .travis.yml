@@ -13,6 +13,9 @@ matrix:
           language: generic
           env: TOXENV=3.6.2
 
+before_install:
+  - ./travis/osx-setup.sh
+
 install:
   - pip install -r dependencies.txt
 
