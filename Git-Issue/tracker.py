@@ -15,7 +15,6 @@ class Tracker(object):
         self.issue_count += 1
 
     def store_tracker(self):
-
         JsonConvert.ToFile(self, Tracker.path)
 
     @classmethod

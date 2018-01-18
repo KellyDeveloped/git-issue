@@ -1,4 +1,4 @@
-import git
+from git_manager import GitManager
 import os
 import jsonutils
 
@@ -23,8 +23,7 @@ class GitUser(object):
             self.email = email
 
     def _get_current_user(self, repo=None):
-
-        repo = git.Repo(os.getcwd(), search_parent_directories=True)
+        repo = GitManager.obtain_repo()
 
         reader = repo.config_reader()
         self.user = reader.get_value("user", "name")
@@ -32,7 +31,7 @@ class GitUser(object):
 
     @staticmethod
     def from_email(email):
-        repo = git.Repo(os.getcwd(), search_parent_directories=True)
+        repo = GitManager.obtain_repo()
         
         #repo.git.shortlog(se)...
 

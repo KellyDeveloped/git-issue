@@ -33,6 +33,7 @@
     </Compile>
     <Compile Include="gitissue.py" />
     <Compile Include="gituser.py" />
+    <Compile Include="git_manager.py" />
     <Compile Include="issue.py">
       <SubType>Code</SubType>
     </Compile>
