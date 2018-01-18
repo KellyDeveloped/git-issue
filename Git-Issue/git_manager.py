@@ -13,7 +13,8 @@ class GitManager(object):
     def load_issue_branch(self):
         repo = self.obtain_repo()
 
-        path = os.path.normpath( repo.working_dir + "/issue-branch" )
+        issue_path = "{}/{}".format(repo.working_dir, self.ISSUE_BRANCH)
+        path = os.path.normpath(issue_path)
         repo.git.worktree("add", path, self.ISSUE_BRANCH)
         
         if os.path.exists(path):
@@ -26,9 +27,13 @@ class GitManager(object):
     def unload_issue_branch(self):
         repo = self.obtain_repo()
 
-        path = os.path.normpath( repo.working_dir + "/issue-branch")
+        # working directory should be that of the /issue branch produced by load_issue_branch
+        path = os.path.normpath(repo.working_dir)
+
+        os.chdir("..")
         shutil.rmtree(path)
         
+        repo = self.obtain_repo()
         repo.git.worktree("prune")
 
     @staticmethod
