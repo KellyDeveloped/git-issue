@@ -17,6 +17,7 @@ before_install:
   - ./.travis/osx-setup.sh
 
 install:
+  - export PYTHONPATH=$PYTHONPATH:$(pwd)/Git-Issue/git_issue
   - pip install -r dependencies.txt
 
 script: python -m pytest
