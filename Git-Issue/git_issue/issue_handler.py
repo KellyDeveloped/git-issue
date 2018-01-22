@@ -21,7 +21,7 @@ def get_all_issues():
     raise NotImplementedError
 
 def store_issue(issue):
-    raw_path = os.getcwd() + "/{}.json".format(issue.id)
+    raw_path = f"{os.getcwd()}/{issue.id}/issue.json"
     normalised_path = os.path.normpath(raw_path)
     JsonConvert.ToFile(issue, normalised_path)
     _increment_issue_count()
