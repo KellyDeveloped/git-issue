@@ -1,6 +1,6 @@
 import os
-from jsonutils import JsonConvert
-from tracker import Tracker
+from git_issue.json_utils import JsonConvert
+from git_issue.tracker import Tracker
 
 def _increment_issue_count():
     tracker = Tracker.obtain_tracker()

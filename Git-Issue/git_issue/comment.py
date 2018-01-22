@@ -1,8 +1,7 @@
 from datetime import datetime
 from gituser import GitUser
-import jsonutils
 
-@jsonutils.JsonConvert.register
+@json_utils.JsonConvert.register
 class Comment(object):
     """ Class represents what a comment is. The default date of a comment is the current datetime
         in UTC formatted as ISO. As issue contributors may be situated all across the world,

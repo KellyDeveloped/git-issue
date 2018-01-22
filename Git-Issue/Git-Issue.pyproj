@@ -15,6 +15,7 @@
     <LaunchProvider>Standard Python launcher</LaunchProvider>
     <CommandLineArguments>create --summary "Test Summary" --description "Yaldi, we even have a description!" --assignee "liamcairnskelly@googlemail.com"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
+    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -28,24 +29,33 @@
     <OutputPath>bin\Run\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="comment.py">
+    <Compile Include="git_issue\comment.py" />
+    <Compile Include="git_issue\gitissue.py" />
+    <Compile Include="git_issue\gituser.py" />
+    <Compile Include="git_issue\git_manager.py" />
+    <Compile Include="git_issue\issue.py" />
+    <Compile Include="git_issue\issue_handler.py" />
+    <Compile Include="git_issue\json_utils.py" />
+    <Compile Include="git_issue\tracker.py" />
+    <Compile Include="git_issue\__init__.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="gitissue.py" />
-    <Compile Include="gituser.py" />
-    <Compile Include="git_manager.py" />
-    <Compile Include="issue.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="issue_handler.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="jsonutils.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="tracker.py">
-      <SubType>Code</SubType>
-    </Compile>
+    <Compile Include="tests\test_issue_handler.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="git_issue\" />
+    <Folder Include="tests\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Interpreter Include="env\">
+      <Id>env</Id>
+      <Version>3.6</Version>
+      <Description>env (Python 3.6 (64-bit))</Description>
+      <InterpreterPath>Scripts\python.exe</InterpreterPath>
+      <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Architecture>X64</Architecture>
+    </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

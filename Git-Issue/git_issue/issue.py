@@ -1,8 +1,7 @@
-from gituser import GitUser
-from comment import Comment
-import jsonutils
+from git_issue.gituser import GitUser
+from git_issue.comment import Comment
 
-@jsonutils.JsonConvert.register
+@json_utils.JsonConvert.register
 class Issue(object):
     """This class encapsulates what an issue is, and provides utility methods to """
 

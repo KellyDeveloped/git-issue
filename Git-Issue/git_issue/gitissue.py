@@ -1,10 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import jsonutils
 import issue_handler
-from issue import Issue
-from gituser import GitUser
+from git_issue.issue import Issue
+from git_issue.gituser import GitUser
 
 # Arguments start here
 parser = argparse.ArgumentParser(prog='git issue')

@@ -1,4 +1,4 @@
-from jsonutils import JsonConvert
+from git_issue.json_utils import JsonConvert
 import os
 
 @JsonConvert.register

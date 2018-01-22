@@ -1,8 +1,7 @@
-from git_manager import GitManager
+from git_issue.git_manager import GitManager
 import os
-import jsonutils
 
-@jsonutils.JsonConvert.register
+@json_utils.JsonConvert.register
 class GitUser(object):
     """description of class"""
 

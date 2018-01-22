@@ -26,3 +26,6 @@ bld/
 __pycache__/
 *.pyc
 /.vs
+/Git-Issue/env
+/Git-Issue/.cache/v/cache
+/.cache/v/cache
