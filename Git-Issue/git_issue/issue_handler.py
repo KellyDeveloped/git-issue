@@ -1,4 +1,4 @@
-import os
+import pathlib
 from pathlib import Path
 from git_issue.json_utils import JsonConvert
 from git_issue.tracker import Tracker
@@ -9,24 +9,26 @@ def _increment_issue_count():
     tracker.store_tracker()
 
 def _generate_issue_path(id):
-    return Path(f"{Path.cwd()}/{id}/issue.json")
+    return Path.cwd().joinpath(f"{id}/issue.json")
 
 def generate_issue_id():
     tracker = Tracker.obtain_tracker()
     return "{}-{}".format(tracker.ISSUE_IDENTIFIER, (tracker.issue_count + 1))
 
 def does_issue_exist(id):
-    pathFinder = Path(_generate_issue_path(id))
-    return pathFinder.exists()
+    return _generate_issue_path(id).exists()
 
 def get_issue(id):
     try:
-        return JsonConvert.FromFile(_generate_issue_path(issue))
+        return JsonConvert.FromFile(_generate_issue_path(id))
     except IOError:
         return None
 
 def get_all_issues():
-    raise NotImplementedError
+    path = Path.cwd()
+
+    dirs = [d for d in path.iterdir() if d.is_dir() and d.match("ISSUE-*")]
+    return [get_issue(i.parts[-1]) for i in dirs]
 
 def store_issue(issue):
     path = _generate_issue_path(issue.id)
@@ -34,19 +36,27 @@ def store_issue(issue):
     _increment_issue_count()
 
 def display_issue(issue):
-    print ("Issue ID:\t{}".format(issue.id))
-    print ("Summary:\t{}".format(issue.summary))
-    print ("Description:\t{}".format(issue.description))
+    print (f"Issue ID:\t{issue.id}")
+    print (f"Summary:\t{issue.summary}")
+    print (f"Description:\t{issue.description}")
     
     print ("Comments:")
     for c in issue.comments:
-        print ("\tUser: {}\tTimestamp:{}".format(c.user, c.date))
-        print ('\t"{}"'.format(c.comment))
+        print (f"\tUser: {c.user}\tTimestamp:{c.date}")
+        print (f'\t"{c.comment}"')
 
-    print ("Status:\t{}".format(issue.status))
-    print ("Assignee:\t{}, {}".format(issue.assignee.user, issue.assignee.email))
-    print ("Reporter:\t{}, {}".format(issue.reporter.user, issue.reporter.email))
+    print (f"Status:\t\t{issue.status}")
     
+    if issue.assignee != None:
+        print (f"Assignee:\t{issue.assignee.user}, {issue.assignee.email}")
+    else:
+        print ("Assignee:\tUnassigned")
+
+    if issue.reporter != None:
+        print (f"Reporter:\t{issue.reporter.user}, {issue.reporter.email}")
+    else:
+        print ("Reporter:\tUnassigned")
+
     print ("Subscribers:")
     for s in issue.subscribers:
-        print ("\t{}, {}".format(issue.assignee.user, issue.assignee.email))
+        print (f"\t{s.user}, {s.email}")

@@ -6,13 +6,15 @@ from git_issue.json_utils import JsonConvert
 class Issue(object):
     """This class encapsulates what an issue is, and provides utility methods to """
 
-    def __init__(self):
-        self.id = ""
-        self.summary = ""
-        self.description = ""
-        self.comments:[Comment] = []
-        self.status = ""
-        self.assignee:GitUser = None
-        self.reporter:GitUser = None
-        self.subscribers:[GitUser] = []
-        self.attachments = []
+    def __init__(self, id=None, summary=None, description=None, comments=[],
+                status=None, assignee=None, reporter=None,
+               subscribers=[], attachments=[]):
+        self.id = id
+        self.summary = summary
+        self.description = description
+        self.comments:[Comment] = comments
+        self.status = status
+        self.assignee:GitUser = assignee
+        self.reporter:GitUser = reporter
+        self.subscribers:[GitUser] = subscribers
+        self.attachments = attachments

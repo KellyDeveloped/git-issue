@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import argparse
-import issue_handler
+import git_issue.issue_handler as issue_handler
 from git_issue.issue import Issue
 from git_issue.gituser import GitUser
 
@@ -58,10 +58,21 @@ def comment(args):
     print("to be defined")
 
 def show(args):
-    print("to be defined")
+    if hasattr(args, "issue"):
+        issue = issue_handler.get_issue(args.issue)
+        
+        if issue == None:
+            print (f"Issue with ID {args.issue} was not found.")
+        else:
+            issue_handler.display_issue(issue)
+    else:
+        list(args)
 
 def list(args):
-    print("to be defined")
+    issues = issue_handler.get_all_issues()
+    for i in issues:
+        issue_handler.display_issue(i)
+        print()
 
 def subscribe(args):
     print("to be defined")
@@ -91,6 +102,7 @@ commentParser.set_defaults(func=comment)
 showParser.add_argument('--issue', '-i', help='Displays the given issue.')
 showParser.set_defaults(func=show)
 
+listParser.set_defaults(func=list)
 
 subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
 subscribeParser.set_defaults(func=subscribe)

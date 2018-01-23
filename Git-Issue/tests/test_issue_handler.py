@@ -67,7 +67,43 @@ def test_store_issue_stores_file(json, regular_issue):
 
 def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
     root = "/tests"
-    monkeypatch.setattr("pathlib.Path.cwd", lambda : root)
+    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(root))
     handler.store_issue(regular_issue)
     assert json.to_file_path == Path(f"/tests/{regular_issue.id}/issue.json")
+
+def create_tmp_file(dir, issue):
+    class FakeParent():
+        def exists(any=None):
+            return True
     
+    new_dir = dir.mkdir(issue.id).join("issue.json")
+    new_dir.parent = FakeParent()
+    JsonConvert.ToFile(issue, new_dir)
+
+    return new_dir
+
+def test_get_issue(monkeypatch, tmpdir, regular_issue):  
+    dir = create_tmp_file(tmpdir, regular_issue)
+    monkeypatch.setattr("pathlib.Path.joinpath", lambda x, y : dir)
+
+    result = handler.get_issue(regular_issue.id)
+    assert regular_issue.id == result.id
+
+
+def test_get_all_issues(monkeypatch, tmpdir, regular_issue):
+    expected = [regular_issue, Issue("ISSUE-NA")]
+
+    dirs = []
+    dirs.append(create_tmp_file(tmpdir, expected[0]))
+    dirs.append(create_tmp_file(tmpdir, expected[1]))
+    
+    print(dirs)
+    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(tmpdir))
+    
+    result = handler.get_all_issues()
+
+    expected.sort(key=lambda x: x.id)
+    result.sort(key=lambda x: x.id)
+    
+    assert len(expected) == len(result)
+    assert expected[0].id == result[0].id and expected[1].id == result[1].id
