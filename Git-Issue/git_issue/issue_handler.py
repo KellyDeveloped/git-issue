@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from git_issue.json_utils import JsonConvert
 from git_issue.tracker import Tracker
 
@@ -7,23 +8,29 @@ def _increment_issue_count():
     tracker.increment_issue_count()
     tracker.store_tracker()
 
+def _generate_issue_path(id):
+    return Path(f"{Path.cwd()}/{id}/issue.json")
+
 def generate_issue_id():
     tracker = Tracker.obtain_tracker()
     return "{}-{}".format(tracker.ISSUE_IDENTIFIER, (tracker.issue_count + 1))
 
 def does_issue_exist(id):
-    raise NotImplementedError
+    pathFinder = Path(_generate_issue_path(id))
+    return pathFinder.exists()
 
 def get_issue(id):
-    raise NotImplementedError
+    try:
+        return JsonConvert.FromFile(_generate_issue_path(issue))
+    except IOError:
+        return None
 
 def get_all_issues():
     raise NotImplementedError
 
 def store_issue(issue):
-    raw_path = f"{os.getcwd()}/{issue.id}/issue.json"
-    normalised_path = os.path.normpath(raw_path)
-    JsonConvert.ToFile(issue, normalised_path)
+    path = _generate_issue_path(issue.id)
+    JsonConvert.ToFile(issue, path)
     _increment_issue_count()
 
 def display_issue(issue):

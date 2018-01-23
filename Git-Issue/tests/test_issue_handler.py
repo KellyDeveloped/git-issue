@@ -1,6 +1,6 @@
-import os
 import pytest
 import git_issue.issue_handler as handler
+from pathlib import Path
 from git_issue.tracker import Tracker
 from git_issue.issue import Issue
 from git_issue.json_utils import JsonConvert
@@ -67,7 +67,7 @@ def test_store_issue_stores_file(json, regular_issue):
 
 def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
     root = "/tests"
-    monkeypatch.setattr("os.getcwd", lambda : root)
+    monkeypatch.setattr("pathlib.Path.cwd", lambda : root)
     handler.store_issue(regular_issue)
-    assert json.to_file_path == os.path.normpath(f"/tests/{regular_issue.id}/issue.json")
+    assert json.to_file_path == Path(f"/tests/{regular_issue.id}/issue.json")
     
