@@ -1,5 +1,6 @@
 import git
 import os
+from pathlib import Path
 import shutil
 
 class GitManager(object):
@@ -21,7 +22,34 @@ class GitManager(object):
 
         issue_path = "{}/{}".format(repo.working_dir, self.ISSUE_BRANCH)
         path = os.path.normpath(issue_path)
-        repo.git.worktree("add", path, self.ISSUE_BRANCH)
+
+        worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
+        
+        if not os.path.exists(path) and os.path.exists(worktree_path):
+            shutil.rmtree(worktree_path)
+        elif os.path.exists(path) and not os.path.exists(worktree_path):
+            print (f"An issue folder already exists at location {path}.")
+            print ("This folder is required to create a worktree of the issue branch.")
+            print ("As this could be a user-created folder, I need confirmation on if I can delete this folder.")
+            print ("\n\nPlease review the contents before proceeding.")
+
+            proceed = input("\nConfirm deletion (Y/N): ").capitalize()
+    
+            while proceed != "Y" and proceed != "YES" and proceed != "N" and proceed != "NO":
+                proceed = input("\nInvalid input, please try again (Y/N): ").capitalize()
+
+            if proceed == "Y" or proceed == "YES":
+                shutil.rmtree(path)
+                print(f"\nDirectory {path} successfully deleted.")
+
+            else:
+                print ("\nOperation cancelled.")
+                print ("Please change your configuration to use a new non-conflicting branch name.")
+                print ("Note that this requires manually migrating branches.")
+                exit()
+        
+        if not os.path.exists(path) and not os.path.exists(worktree_path):
+            repo.git.worktree("add", path, self.ISSUE_BRANCH)
 
         if os.path.exists(path):
             os.chdir(path)
@@ -34,8 +62,7 @@ class GitManager(object):
                 repo.git.rm("-rf", ".")
                 self._commit(repo, "created_issue_branch")
 
-
-            return os.getcwd();
+            return os.getcwd()
 
         raise git.CommandError("Failed to add a work tree for branch {} at path {}"
                                 .format(self.ISSUE_BRANCH, path))
@@ -44,6 +71,16 @@ class GitManager(object):
         repo = self.obtain_repo()
 
         # working directory should be that of the /issue branch produced by load_issue_branch
+        working_dir = Path(repo.working_dir)
+        if (working_dir.parts[-1] != self.ISSUE_BRANCH):
+            issue_path = working_dir.joinpath(self.ISSUE_BRANCH)
+            
+            if issue_path.exists():
+                os.chdir(issue_path)
+                repo = self.obtain_repo()
+            else:
+                return
+
         path = os.path.normpath(repo.working_dir)
 
         os.chdir("..")
