@@ -1,0 +1,11 @@
+﻿{% extends "layout.html" %}
+
+{% block content %}
+
+{% for issue in issues %}
+<div class=flash>{{ issue.id }}</div>
+{% endfor %}
+
+<p>Use this area to provide additional information.</p>
+
+{% endblock %}

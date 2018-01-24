@@ -28,4 +28,6 @@ __pycache__/
 /.vs
 /Git-Issue/env
 /Git-Issue/.cache/v/cache
+/issue_web_gui/env
+/issue_web_gui/.cache/v/cache
 /.cache/v/cache
