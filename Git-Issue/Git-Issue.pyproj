@@ -13,7 +13,7 @@
     <RootNamespace>Git-Issue</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>create --summary "Test2" --description "Scaramoosh!" --reporter "liamcairnskelly@gmail.com"</CommandLineArguments>
+    <CommandLineArguments>edit --issue "ISSUE-1" --summary "Test 2.1.8" --description "Can you do the fandando?"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>

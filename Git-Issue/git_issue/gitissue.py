@@ -27,6 +27,21 @@ listParser = subparser.add_parser('list', help='List known issues.')
 subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
 unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
 
+def confirm_operation(cmd, issue):
+    print("Operation will result in the following issue:\n")
+    issue_handler.display_issue(issue)
+    create = input(f"\nConfirm {cmd} (Y/N): ").capitalize()
+    
+    while create != "Y" and create != "YES" and create != "N" and create != "NO":
+        create = input("\nInvalid input, please try again (Y/N): ").capitalize()
+
+    if create == "Y" or create == "YES":
+        issue_handler.store_issue(issue)
+        print(f"{issue.id} created successfully.")
+
+    else:
+        print("Operation cancelled.")
+
 # Default methods for sub-parsers. These methods will be called when the keyword for the sub-parser is given.
 def create(args):
     issue = Issue()
@@ -37,22 +52,22 @@ def create(args):
     issue.reporter = GitUser(email=args.reporter)
     issue.subscribers.append(GitUser())
 
-    print("The following issue will be created:\n")
-    issue_handler.display_issue(issue)
-    create = input("\nConfirm creation (Y/N): ").capitalize()
-    
-    while create != "Y" and create != "YES" and create != "N" and create != "NO":
-        create = input("\nInvalid input, please try again (Y/N): ").capitalize()
-
-    if create == "Y" or create == "YES":
-        issue_handler.store_issue(issue)
-        print("{} created successfully.".format(issue.id))
-
-    else:
-        print("Issue creation cancelled.")
+    confirm_operation("creation", issue)
 
 def edit(args):
-    print("to be defined")
+    issue = issue_handler.get_issue(args.issue)
+
+    print ("Issue before editing:")
+    issue_handler.display_issue(issue)
+
+    issue.summary = args.summary if args.summary != None else issue.summary
+    issue.description = args.description if args.description != None else issue.description
+    issue.assignee = args.assignee if args.assignee != None else issue.assignee
+    issue.reporter = args.reporter if args.reporter != None else issue.reporter
+    issue.status = args.status if args.status != None else issue.status
+
+    print()
+    confirm_operation("edit", issue)
 
 def comment(args):
     print("to be defined")
