@@ -1,7 +1,8 @@
 import pathlib
 from pathlib import Path
-from git_issue.json_utils import JsonConvert
-from git_issue.tracker import Tracker
+from git_manager import GitManager
+from json_utils import JsonConvert
+from tracker import Tracker
 
 def _increment_issue_count():
     tracker = Tracker.obtain_tracker()
@@ -20,20 +21,43 @@ def does_issue_exist(id):
 
 def get_issue(id):
     try:
-        return JsonConvert.FromFile(_generate_issue_path(id))
+        gm = GitManager()
+        gm.load_issue_branch()
+        gm.pull()
+
+        issue = JsonConvert.FromFile(_generate_issue_path(id))
+
+        gm.unload_issue_branch()
+        return issue
     except IOError:
         return None
 
 def get_all_issues():
+    gm = GitManager()
+    gm.pull()
+    gm.load_issue_branch()
+
     path = Path.cwd()
-
     dirs = [d for d in path.iterdir() if d.is_dir() and d.match("ISSUE-*")]
-    return [get_issue(i.parts[-1]) for i in dirs]
+    issues = [get_issue(i.parts[-1]) for i in dirs]
 
-def store_issue(issue):
+    gm.unload_issue_branch()
+    return issues
+
+def store_issue(issue, cmd):
+    gm = GitManager()
+    gm.pull()
+    gm.load_issue_branch()
+
     path = _generate_issue_path(issue.id)
     JsonConvert.ToFile(issue, path)
     _increment_issue_count()
+
+    gm.add_to_index([str(path)])
+
+    gm.commit(cmd, issue.id)
+    gm.unload_issue_branch()
+    gm.push()
 
 def display_issue(issue):
     print (f"Issue ID:\t{issue.id}")

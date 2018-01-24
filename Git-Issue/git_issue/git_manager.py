@@ -11,17 +11,37 @@ class GitManager(object):
     ISSUE_BRANCH = "issue"
     ORIGINAL_BRANCH = os.getcwd()
 
+    def _is_issue_branch_loaded(self, repo):
+        git_dir = Path(repo.git_dir)
+        worktree_path = git_dir.joinpath(f"worktrees/{self.ISSUE_BRANCH}")
+        
+        working_dir = Path(repo.working_dir)
+        issue_dir = working_dir.joinpath(self.ISSUE_BRANCH)
+
+        worktrees_exist = working_dir.match(f"*/{self.ISSUE_BRANCH}") or Path.exists(issue_dir)
+        issue_files_exist = git_dir.match(f"*worktrees/{self.ISSUE_BRANCH}") or Path.exists(worktree_path)
+        return worktrees_exist and issue_files_exist
+
+    def _does_repo_have_issue_remote(self, repo):
+        rs = [r for r in repo.remote().refs if r.remote_head == self.ISSUE_BRANCH]
+        return rs.count == 1
+
     def load_issue_branch(self):
         repo = self.obtain_repo()
+
+        issue_path = "{}/{}".format(repo.working_dir, self.ISSUE_BRANCH)
+        path = os.path.normpath(issue_path)
+
+        if (self._is_issue_branch_loaded(repo)):
+            if (Path.cwd() != path):
+                os.chdir(path)
+            return
 
         new_branch = False
 
         if not hasattr(repo.refs, self.ISSUE_BRANCH):
             repo.create_head(self.ISSUE_BRANCH)
             new_branch = True
-
-        issue_path = "{}/{}".format(repo.working_dir, self.ISSUE_BRANCH)
-        path = os.path.normpath(issue_path)
 
         worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
         
@@ -60,7 +80,8 @@ class GitManager(object):
             if new_branch:
                 repo = self.obtain_repo()
                 repo.git.rm("-rf", ".")
-                self._commit(repo, "created_issue_branch")
+                self.commit(repo, "created_issue_branch")
+                repo.git.push("-u", "origin", self.ISSUE_BRANCH)
 
             return os.getcwd()
 
@@ -69,6 +90,9 @@ class GitManager(object):
 
     def unload_issue_branch(self):
         repo = self.obtain_repo()
+
+        if (not self._is_issue_branch_loaded(repo)):
+            return
 
         # working directory should be that of the /issue branch produced by load_issue_branch
         working_dir = Path(repo.working_dir)
@@ -91,31 +115,42 @@ class GitManager(object):
 
     def pull(self):
         repo = self.obtain_repo()
-        print ("Pulling from issue branch.")
-        repo.remote().pull(self.ISSUE_BRANCH)
+        if (self._does_repo_have_issue_remote(repo)):
+            print ("Pulling from issue branch.")
+            repo.remote().pull(self.ISSUE_BRANCH)
 
-    def _push(self, repo):
+    def add_to_index(self, paths:[str]):
+        repo = self.obtain_repo()
+        repo.index.add(paths)
+
+    def push(self):
+        repo = self.obtain_repo()
+        print ("Pushing to issue branch")
         repo.remote().push(self.ISSUE_BRANCH)
 
-    def _commit(self, repo, cmd, issue=None, path=None):
-        index = repo.index
-
-        # Add unstaged files if provided
-        if path != None:
-            index.add(path)
-
+    def commit(self, cmd, id:str=None):
         commit_message = f"Action {cmd} performed"
 
-        if issue != None:
-            commit_message = f"{commit_message} on issue: {issue.id}"
+        if id != None:
+            commit_message = f"{commit_message} on issue: {id}"
 
-        index.commit(commit_message)
+        #print("committing the following files:")
+        #for path in paths:
+        #    print(f"\t{path}")
+        #print("\nwith the commit message: {commit_message}")
 
-
-    def commit_and_push(self, cmd, issue, path:[str]):
         repo = self.obtain_repo()
-        self._commit(repo, cmd, issue, path)
-        self._push(repo)
+        repo.index.commit(commit_message)
+
+
+    def commit_and_push(self, cmd, id):
+        repo = self.obtain_repo()
+
+        if (not self._is_issue_branch_loaded(repo)):
+            return
+
+        self.commit(repo, cmd, id)
+        self.push(repo)
         
     @staticmethod
     def obtain_repo():

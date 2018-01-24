@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 
 import argparse
-import git_issue.issue_handler as issue_handler
-from git_issue.issue import Issue
-from git_issue.gituser import GitUser
+import issue_handler as issue_handler
+from issue import Issue
+from gituser import GitUser
 
 # Arguments start here
 parser = argparse.ArgumentParser(prog='git issue')
@@ -36,7 +36,7 @@ def confirm_operation(cmd, issue):
         create = input("\nInvalid input, please try again (Y/N): ").capitalize()
 
     if create == "Y" or create == "YES":
-        issue_handler.store_issue(issue)
+        issue_handler.store_issue(issue, cmd)
         print(f"{issue.id} created successfully.")
 
     else:

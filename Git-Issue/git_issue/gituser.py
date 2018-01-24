@@ -1,5 +1,5 @@
-from git_issue.git_manager import GitManager
-from git_issue.json_utils import JsonConvert
+from git_manager import GitManager
+from json_utils import JsonConvert
 import os
 
 @JsonConvert.register
