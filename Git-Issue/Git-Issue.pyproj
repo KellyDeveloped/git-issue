@@ -5,15 +5,14 @@
     <ProjectGuid>e257338e-16d4-44ab-bf14-d9b17680cca1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>git_issue/gitissue.py</StartupFile>
-    <SearchPath>
-    </SearchPath>
+    <SearchPath>git_issue</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Git-Issue</Name>
     <RootNamespace>Git-Issue</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>create --summary "Test2" --description "Scaramoosh!" --reporter "liamcairnskelly@gmail.com"</CommandLineArguments>
+    <CommandLineArguments>create --summary "Test Summary" --description "Yaldi, we even have a description!" --assignee "liamcairnskelly@googlemail.com"</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
@@ -38,6 +37,9 @@
     <Compile Include="git_issue\json_utils.py" />
     <Compile Include="git_issue\tracker.py" />
     <Compile Include="git_issue\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="setup.py">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tests\test_issue_handler.py" />

@@ -1,6 +1,6 @@
 from datetime import datetime
-from git_issue.gituser import GitUser
-from git_issue.json_utils import JsonConvert
+from gituser import GitUser
+from json_utils import JsonConvert
 
 @JsonConvert.register
 class Comment(object):

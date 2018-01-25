@@ -1,6 +1,6 @@
-from git_issue.gituser import GitUser
-from git_issue.comment import Comment
-from git_issue.json_utils import JsonConvert
+from gituser import GitUser
+from comment import Comment
+from json_utils import JsonConvert
 
 @JsonConvert.register
 class Issue(object):

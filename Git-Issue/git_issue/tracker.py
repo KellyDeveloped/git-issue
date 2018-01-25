@@ -1,5 +1,6 @@
 from pathlib import Path
-from git_issue.json_utils import JsonConvert
+from json_utils import JsonConvert
+from git_manager import GitManager
 
 @JsonConvert.register
 class Tracker(object):
@@ -15,6 +16,8 @@ class Tracker(object):
 
     def store_tracker(self):
         JsonConvert.ToFile(self, Tracker.get_path())
+        gm = GitManager()
+        gm.add_to_index([str(Tracker.get_path())])
 
     @classmethod
     def get_path(cls):
