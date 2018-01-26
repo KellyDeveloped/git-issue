@@ -29,3 +29,7 @@ __pycache__/
 /Git-Issue/env
 /Git-Issue/.cache/v/cache
 /.cache/v/cache
+
+# Ubuntu/Pycharm
+venv/
+.idea/
