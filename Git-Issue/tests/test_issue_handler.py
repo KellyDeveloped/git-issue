@@ -1,9 +1,12 @@
-import pytest
-import git_issue.issue_handler as handler
+import sys
 from pathlib import Path
-from git_issue.tracker import Tracker
-from git_issue.issue import Issue
-from git_issue.json_utils import JsonConvert
+sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
+print(sys.path)
+import pytest
+import issue_handler as handler
+from tracker import Tracker
+from issue import Issue
+from json_utils import JsonConvert
 
 @pytest.fixture
 def tracker(monkeypatch):
@@ -20,7 +23,7 @@ def tracker(monkeypatch):
             return MockTracker()
 
     mt = MockTracker()
-    monkeypatch.setattr("git_issue.tracker.Tracker.obtain_tracker", lambda: mt)
+    monkeypatch.setattr("tracker.Tracker.obtain_tracker", lambda: mt)
     return mt
 
 @pytest.fixture
@@ -40,8 +43,8 @@ def json(monkeypatch):
         def FromFile(cls, filepath):
             cls.has_from_file_been_called = True
 
-    monkeypatch.setattr("git_issue.json_utils.JsonConvert.ToFile", MockConvert.ToFile)
-    monkeypatch.setattr("git_issue.json_utils.JsonConvert.FromFile", MockConvert.FromFile)
+    monkeypatch.setattr("json_utils.JsonConvert.ToFile", MockConvert.ToFile)
+    monkeypatch.setattr("json_utils.JsonConvert.FromFile", MockConvert.FromFile)
     return MockConvert()
 
 @pytest.fixture
