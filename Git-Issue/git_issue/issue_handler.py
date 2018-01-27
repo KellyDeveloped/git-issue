@@ -11,8 +11,33 @@ def _increment_issue_count():
     tracker.store_tracker()
 
 def _handle_git_flow(action: Callable[[], object or None],
-                     should_push=False, 
-                     generate_index_paths: Callable[[], list]=None):
+                     should_push=False,
+                     generate_index_paths: Callable[[], list]=None,
+                     commit_type:str=None,
+                     commit_issue_id:str=None
+                     ):
+    """ 
+        This executes the typical git workflow:
+            Pull origin/issue;
+            Add issue branch as worktree;
+            Perform action with issues;
+
+            If action invokes pushable changes:
+                add changes to index;
+                commit changes;
+
+            Unload issue worktree;
+
+            If should_push:
+                push origin/issue;
+
+            Return action results
+            
+        This method uses the strategy pattern as we tell it how to behave
+        once the git branch is loaded - it knows its to do something, but
+        it doesn't know what. The same goes for generating the index path;
+        it knows we need paths but we specify how to get them.
+    """
     gm = GitManager()
     gm.pull()
     gm.load_issue_branch()
@@ -22,6 +47,7 @@ def _handle_git_flow(action: Callable[[], object or None],
     if (should_push and generate_index_paths != None):
         paths = generate_index_paths()
         gm.add_to_index(paths)
+        gm.commit(commit_type, commit_issue_id)
 
     gm.unload_issue_branch()
     
@@ -60,13 +86,16 @@ def get_all_issues():
     return issues
 
 def store_issue(issue, cmd):
+    file_path = _generate_issue_file_path(issue.id)
+    gen_paths = lambda : file_path
+
     def action():
-        path = _generate_issue_file_path(issue.id)
+        path = gen_paths()
         JsonConvert.ToFile(issue, path)
         _increment_issue_count()
         return [str(path)]
 
-    _handle_git_flow(action, True)
+    _handle_git_flow(action, True, gen_paths, cmd, issue.id)
 
 def display_issue(issue):
     print (f"Issue ID:\t{issue.id}")
