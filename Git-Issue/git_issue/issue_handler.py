@@ -29,7 +29,7 @@ def get_issue(id):
 
         gm.unload_issue_branch()
         return issue
-    except IOError:
+    except IOError(e):
         return None
 
 def get_all_issues():

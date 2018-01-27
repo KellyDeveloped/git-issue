@@ -1,9 +1,11 @@
 import sys
 from pathlib import Path
+from unittest.mock import MagicMock
 sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
-print(sys.path)
 import pytest
+import inspect
 import issue_handler as handler
+from git_manager import GitManager
 from tracker import Tracker
 from issue import Issue
 from json_utils import JsonConvert
@@ -57,23 +59,6 @@ def regular_issue(tracker):
     issue.summary = "summary"
     return issue
 
-def test_tracker_increment(tracker):
-    handler._increment_issue_count()
-    assert tracker.issue_count == 11
-
-def test_id_generation(tracker):
-    assert handler.generate_issue_id() == f"{tracker.ISSUE_IDENTIFIER}-{tracker.issue_count + 1}"
-
-def test_store_issue_stores_file(json, regular_issue):
-    handler.store_issue(regular_issue)
-    assert json.has_to_file_been_called
-
-def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
-    root = "/tests"
-    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(root))
-    handler.store_issue(regular_issue)
-    assert json.to_file_path == Path(f"/tests/{regular_issue.id}/issue.json")
-
 def create_tmp_file(dir, issue):
     class FakeParent():
         def exists(any=None):
@@ -85,8 +70,40 @@ def create_tmp_file(dir, issue):
 
     return new_dir
 
+def mock_git():
+    def fake_method(*nargs):
+        return
+
+    gm = GitManager()
+    methods = inspect.getmembers(gm, predicate=inspect.ismethod)
+
+    for m in methods:
+        setattr(GitManager, m[0], fake_method)
+
+
+def test_tracker_increment(tracker):
+    handler._increment_issue_count()
+    assert tracker.issue_count == 11
+
+def test_id_generation(tracker):
+    assert handler.generate_issue_id() == f"{tracker.ISSUE_IDENTIFIER}-{tracker.issue_count + 1}"
+
+def test_store_issue_stores_file(json, regular_issue):
+    mock_git()
+    handler.store_issue(regular_issue, None)
+    assert json.has_to_file_been_called
+
+def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
+    mock_git()
+    root = "/tests"
+    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(root))
+    handler.store_issue(regular_issue, None)
+    assert json.to_file_path == Path(f"/tests/{regular_issue.id}/issue.json")
+
 def test_get_issue(monkeypatch, tmpdir, regular_issue):  
     dir = create_tmp_file(tmpdir, regular_issue)
+
+    mock_git()
     monkeypatch.setattr("pathlib.Path.joinpath", lambda x, y : dir)
 
     result = handler.get_issue(regular_issue.id)
@@ -95,6 +112,8 @@ def test_get_issue(monkeypatch, tmpdir, regular_issue):
 
 def test_get_all_issues(monkeypatch, tmpdir, regular_issue):
     expected = [regular_issue, Issue("ISSUE-NA")]
+
+    mock_git()
 
     dirs = []
     dirs.append(create_tmp_file(tmpdir, expected[0]))

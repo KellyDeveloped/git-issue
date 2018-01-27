@@ -82,10 +82,8 @@ class GitManager(object):
                 repo.git.rm("-rf", ".")
                 self.commit(repo, "created_issue_branch")
                 repo.git.push("-u", "origin", self.ISSUE_BRANCH)
-
-            return os.getcwd()
-
-        raise git.CommandError("Failed to add a work tree for branch {} at path {}"
+        else:
+            raise git.CommandError("Failed to add a work tree for branch {} at path {}"
                                 .format(self.ISSUE_BRANCH, path))
 
     def unload_issue_branch(self):
