@@ -1,6 +1,7 @@
-from datetime import datetime
 from gituser import GitUser
-from json_utils import JsonConvert
+from utils import date_utils
+from utils.json_utils import JsonConvert
+import uuid
 
 @JsonConvert.register
 class Comment(object):
@@ -12,7 +13,10 @@ class Comment(object):
         repository, and then immediately after someone from New York were to then add another
         comment the New York's user would appear to be made before the Bangalore comment due
         to it being in an earlier timezone. """
-    def __init__(self):
-        self.comment = ""
-        self.user = GitUser()
-        self.date = datetime.utcnow().isoformat()
+
+    def __init__(self, comment:str="", user:GitUser=GitUser(), date=date_utils.get_date_now(),
+                uuid=uuid.uuid4().int):
+        self.comment = comment
+        self.user = user
+        self.date = date
+        self.uuid = uuid
