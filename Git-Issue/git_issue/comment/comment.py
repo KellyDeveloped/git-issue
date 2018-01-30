@@ -1,6 +1,6 @@
-from utils import date_utils
 from gituser import GitUser
-from json_utils import JsonConvert
+from utils import date_utils
+from utils.json_utils import JsonConvert
 import uuid
 
 @JsonConvert.register

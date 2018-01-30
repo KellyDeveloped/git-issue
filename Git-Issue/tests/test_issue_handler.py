@@ -78,7 +78,8 @@ def mock_git():
     methods = inspect.getmembers(gm, predicate=inspect.ismethod)
 
     for m in methods:
-        setattr(GitManager, m[0], fake_method)
+        if m[0] != "perform_git_workflow":
+            setattr(GitManager, m[0], fake_method)
 
 
 def test_tracker_increment(tracker):
@@ -98,13 +99,13 @@ def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
     root = "/tests"
     monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(root))
     handler.store_issue(regular_issue, None)
-    assert json.to_file_path == Path(f"/tests/{regular_issue.id}/issue.json")
+    assert json.to_file_path == Path(f"/tests/issue/{regular_issue.id}/issue.json")
 
 def test_get_issue(monkeypatch, tmpdir, regular_issue):  
     dir = create_tmp_file(tmpdir, regular_issue)
 
     mock_git()
-    monkeypatch.setattr("pathlib.Path.joinpath", lambda x, y : dir)
+    monkeypatch.setattr("pathlib.Path.joinpath", lambda x, y: Path(dir))
 
     result = handler.get_issue(regular_issue.id)
     assert regular_issue.id == result.id
@@ -116,11 +117,12 @@ def test_get_all_issues(monkeypatch, tmpdir, regular_issue):
     mock_git()
 
     dirs = []
-    dirs.append(create_tmp_file(tmpdir, expected[0]))
-    dirs.append(create_tmp_file(tmpdir, expected[1]))
+    tmpdir.mkdir("/issue")
+    dirs.append(create_tmp_file(tmpdir + "/issue", expected[0]))
+    dirs.append(create_tmp_file(tmpdir + "/issue", expected[1]))
     
     print(dirs)
-    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(tmpdir))
+    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(tmpdir + "/issue"))
     
     result = handler.get_all_issues()
 
