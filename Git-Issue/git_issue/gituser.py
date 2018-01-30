@@ -1,5 +1,5 @@
 from git_manager import GitManager
-from json_utils import JsonConvert
+from utils.json_utils import JsonConvert
 import os
 
 @JsonConvert.register
@@ -14,8 +14,7 @@ class GitUser(object):
         elif (email != None and user == None):
             contributor = self.from_email(email)
             
-            if contributor.user != None:
-                self.user = contributor.user
+            self.user = contributor.user if contributor != None and contributor.user != None else ""
             self.email = email
 
         else:

@@ -28,14 +28,28 @@
     <OutputPath>bin\Run\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="git_issue\comment.py" />
+    <Compile Include="git_issue\comment\comment.py" />
+    <Compile Include="git_issue\comment\handler.py" />
+    <Compile Include="git_issue\comment\index.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="git_issue\comment\index_entry.py" />
+    <Compile Include="git_issue\comment\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="git_issue\gitissue.py" />
     <Compile Include="git_issue\gituser.py" />
     <Compile Include="git_issue\git_manager.py" />
     <Compile Include="git_issue\issue.py" />
     <Compile Include="git_issue\issue_handler.py" />
-    <Compile Include="git_issue\json_utils.py" />
+    <Compile Include="git_issue\utils\json_utils.py" />
     <Compile Include="git_issue\tracker.py" />
+    <Compile Include="git_issue\utils\date_utils.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="git_issue\utils\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="git_issue\__init__.py">
       <SubType>Code</SubType>
     </Compile>
@@ -46,7 +60,8 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="git_issue\" />
-    <Folder Include="webserver\" />
+    <Folder Include="git_issue\comment\" />
+    <Folder Include="git_issue\utils\" />
     <Folder Include="tests\" />
   </ItemGroup>
   <ItemGroup>

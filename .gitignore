@@ -31,3 +31,7 @@ __pycache__/
 /issue_web_gui/env
 /issue_web_gui/.cache/v/cache
 /.cache/v/cache
+
+# Ubuntu/Pycharm
+venv/
+.idea/
