@@ -4,6 +4,7 @@ import argparse
 import issue_handler as issue_handler
 from issue import Issue
 from gituser import GitUser
+from comment.comment import Comment
 
 # Arguments start here
 parser = argparse.ArgumentParser(prog='git issue')
@@ -55,7 +56,14 @@ def create(args):
     confirm_operation("creation", issue)
 
 def edit(args):
+    if (not issue_handler.does_issue_exist(args.issue)):
+        print ("Error: Issue does not exist")
+        return
+    
     issue = issue_handler.get_issue(args.issue)
+
+    if (issue == None):
+        print("There was a problem ")
 
     print ("Issue before editing:")
     issue_handler.display_issue(issue)
@@ -70,7 +78,9 @@ def edit(args):
     confirm_operation("edit", issue)
 
 def comment(args):
-    print("to be defined")
+    comment = Comment(args.comment)
+    issue_handler.add_comment(args.issue, comment)
+        
 
 def show(args):
     if hasattr(args, "issue"):

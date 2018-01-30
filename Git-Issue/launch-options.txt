@@ -1,3 +1,5 @@
 create --summary "Test Summary" --description "Yaldi, we even have a description!" --assignee "liamcairnskelly@googlemail.com"
 
 show --issue ISSUE-
+
+comment --issue "ISSUE-1" --comment "This says something"

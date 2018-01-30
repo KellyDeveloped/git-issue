@@ -2,7 +2,7 @@ import pathlib
 from typing import Callable
 from pathlib import Path
 from git_manager import GitManager
-from json_utils import JsonConvert
+from utils.json_utils import JsonConvert
 from tracker import Tracker
 
 def _increment_issue_count():
@@ -63,7 +63,7 @@ def _generate_issue_file_path(id):
     return Path.cwd().joinpath(f"{_generate_issue_folder_path(id)}/issue.json")
 
 def _generate_issue_comment_path(id):
-    return Path.cwd().joinpath(f"{_generate_issue_folder_path(id)}/comment")
+    return Path.cwd().joinpath(f"{_generate_issue_folder_path(id)}/comments.json")
 
 def generate_issue_id():
     tracker = Tracker.obtain_tracker()
@@ -86,26 +86,39 @@ def get_all_issues():
     return issues
 
 def store_issue(issue, cmd):
-    file_path = _generate_issue_file_path(issue.id)
-    gen_paths = lambda : file_path
+    gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
 
     def action():
-        path = gen_paths()
-        JsonConvert.ToFile(issue, path)
+        JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
         _increment_issue_count()
-        return [str(path)]
 
     _handle_git_flow(action, True, gen_paths, cmd, issue.id)
 
-def display_issue(issue):
+def add_comment(id, comment):
+    gen_paths = lambda : [str(_generate_issue_comment_path(id))]
+    
+    def action():
+        if (does_issue_exist(id)):
+            JsonConvert.ToFile(comment, _generate_issue_comment_path(id))
+        else:
+            print(f"Error: Issue {id} does not exist.")
+            exit()
+
+    _handle_git_flow(action, True, gen_paths, "comment_added", id)
+
+def get_comments(issue):
+    pass
+
+def display_issue(issue, with_comments=False):
     print (f"Issue ID:\t{issue.id}")
     print (f"Summary:\t{issue.summary}")
     print (f"Description:\t{issue.description}")
     
-    print ("Comments:")
-    for c in issue.comments:
-        print (f"\tUser: {c.user}\tTimestamp:{c.date}")
-        print (f'\t"{c.comment}"')
+    if with_comments:
+        print ("Comments:")
+        for c in get_comments:
+            print (f"\tUser: {c.user}\tTimestamp:{c.date}")
+            print (f'\t"{c.comment}"')
 
     print (f"Status:\t\t{issue.status}")
     

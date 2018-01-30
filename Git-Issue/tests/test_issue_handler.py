@@ -8,7 +8,7 @@ import issue_handler as handler
 from git_manager import GitManager
 from tracker import Tracker
 from issue import Issue
-from json_utils import JsonConvert
+from utils.json_utils import JsonConvert
 
 @pytest.fixture
 def tracker(monkeypatch):
@@ -45,8 +45,8 @@ def json(monkeypatch):
         def FromFile(cls, filepath):
             cls.has_from_file_been_called = True
 
-    monkeypatch.setattr("json_utils.JsonConvert.ToFile", MockConvert.ToFile)
-    monkeypatch.setattr("json_utils.JsonConvert.FromFile", MockConvert.FromFile)
+    monkeypatch.setattr("utils.json_utils.JsonConvert.ToFile", MockConvert.ToFile)
+    monkeypatch.setattr("utils.json_utils.JsonConvert.FromFile", MockConvert.FromFile)
     return MockConvert()
 
 @pytest.fixture

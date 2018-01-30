@@ -1,5 +1,5 @@
 from pathlib import Path
-from json_utils import JsonConvert
+from utils.json_utils import JsonConvert
 from git_manager import GitManager
 
 @JsonConvert.register
