@@ -3,9 +3,9 @@
 {% block content %}
 
 {% for issue in issues %}
-<div class=flash>{{ issue.id }}</div>
+    <div style="margin:10px auto">
+        {% include "issue.html" %}
+    </div>
 {% endfor %}
-
-<p>Use this area to provide additional information.</p>
 
 {% endblock %}

@@ -24,8 +24,8 @@ class GitManager(object):
         return worktrees_exist and issue_files_exist
 
     def _does_repo_have_issue_remote(self, repo):
-        rs = [r for r in repo.remote().refs if r.remote_head == self.ISSUE_BRANCH]
-        return len(rs) == 1
+        #rs = [r for r in repo.remote().refs if r.remote_head == self.ISSUE_BRANCH]
+        return True
 
     def should_create_new_branch(self) -> bool:
         print("Cannot find issue branch. I can create one automatically for you, however "
@@ -48,9 +48,9 @@ class GitManager(object):
             return False
 
     def set_up_branch(self):
-        self.pull()
         self.load_issue_branch()
-
+        self.pull()
+        
     def load_issue_branch(self):
         repo = self.obtain_repo()
 
@@ -152,7 +152,8 @@ class GitManager(object):
         repo = self.obtain_repo()
         if (self._does_repo_have_issue_remote(repo)):
             print("Pulling from issue branch.")
-            repo.remote().pull(self.ISSUE_BRANCH)
+
+            repo.git.pull()
 
     def add_to_index(self, paths: [str]):
         repo = self.obtain_repo()

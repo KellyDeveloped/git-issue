@@ -42,22 +42,29 @@ def get_issue(id):
 
 
 def get_all_issues():
-    path = Path.cwd()
-    dirs = [d for d in path.iterdir() if d.is_dir() and d.match("ISSUE-*")]
-    issues = [get_issue(i.parts[-1]) for i in dirs]
-
-    return issues
-
-
-def store_issue(issue, cmd):
-    gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
+    gm = GitManager()
 
     def action():
+        path = Path.cwd()
+        dirs = [d for d in path.iterdir() if d.is_dir() and d.match("ISSUE-*")]
+        return [JsonConvert.FromFile(_generate_issue_file_path(i.parts[-1])) for i in dirs]
+
+    return gm.perform_git_workflow(action)
+
+
+def store_issue(issue, cmd, generate_id=False):
+    gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
+    
+    def action():
+        if (generate_id):
+            issue.id = generate_issue_id()
+
         JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
         _increment_issue_count()
+        return issue
 
     gm = GitManager()
-    gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)
+    return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)
 
 
 def add_comment(issue_id, comment):
