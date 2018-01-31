@@ -12,19 +12,6 @@ class GitManager(object):
     ISSUE_BRANCH = "issue"
     ORIGINAL_BRANCH = os.getcwd()
 
-    BRANCH_NOT_DETECTED_MSG = "Cannot find issue branch. I can create one automatically for you, however "\
-              "the current working branch will need changed until. The branch will be changed back to the current"\
-              "branch once the new branch is created.\n\n"\
-              "The reason for this is that the branch needs to be orphaned - in other words entirely disconnected "\
-              "from the current head in order to have zero history.\n\n"\
-              "This warning is due to unforeseen side affects, such as IDE's detecting the changes and possibly losing"\
-              "any work. If you do not wish for me to create the branch, you can do it yourself with the following"\
-              "command: git checkout --orphan issue"\
-
-    DIRTY_REPO_MSG = "Current branch is considered dirty and no issue branch has been detected and must be made.\n"\
-                  "The process of creating the issue branch may result in loss of work if the branch is dirty.\n"\
-                  "Please try again when the branch is in a clean state. Program will now terminate."\
-
     def _is_issue_branch_loaded(self, repo):
         git_dir = Path(repo.git_dir)
         worktree_path = git_dir.joinpath(f"worktrees/{self.ISSUE_BRANCH}")
@@ -40,38 +27,29 @@ class GitManager(object):
         #rs = [r for r in repo.remote().refs if r.remote_head == self.ISSUE_BRANCH]
         return True
 
-    def get_choice_from_user(self, confirm_msg) -> bool:
-        create = input(confirm_msg).capitalize()
+    def should_create_new_branch(self) -> bool:
+        print("Cannot find issue branch. I can create one automatically for you, however "
+              "the current working branch will need changed until. The branch will be changed back to the current"
+              "branch once the new branch is created.\n\n"
+              "The reason for this is that the branch needs to be orphaned - in other words entirely disconnected "
+              "from the current head in order to have zero history.\n\n"
+              "This warning is due to unforeseen side affects, such as IDE's detecting the changes and possibly losing"
+              "any work. If you do not wish for me to create the branch, you can do it yourself with the following"
+              "command: git checkout --orphan issue")
+        create = input(f"\nConfirm new branch creation (Y/N): ").capitalize()
 
         while create != "Y" and create != "YES" and create != "N" and create != "NO":
             create = input("\nInvalid input, please try again (Y/N): ").capitalize()
 
-        # If false they said no
-        return create == "Y" or create == "YES"
+        if create == "Y" or create == "YES":
+            return True
+
+        else:
+            return False
 
     def set_up_branch(self):
         self.load_issue_branch()
         self.pull()
-
-    def _create_new_issue_branch(self, repo):
-        if repo.is_dirty():
-            print(self.DIRTY_REPO_MSG)
-            exit()
-
-        print(self.BRANCH_NOT_DETECTED_MSG)
-        if not self.get_choice_from_user("\nConfirm new branch creation (Y/N): "):
-            print("Branch not created. Exiting program.")
-            exit()
-
-        curr_branch = repo.head.ref
-        repo.git.checkout("--orphan", self.ISSUE_BRANCH)
-        repo.git.rm("-rf", "--cached", ".")
-
-        self.commit("created_issue_branch", new_branch=True)
-        repo.git.push("-u", "origin", self.ISSUE_BRANCH)
-
-        curr_branch.checkout(force=True)
-
         
     def load_issue_branch(self):
         repo = self.obtain_repo()
@@ -84,8 +62,19 @@ class GitManager(object):
                 os.chdir(path)
             return
 
+        new_branch = False
+
         if not hasattr(repo.refs, self.ISSUE_BRANCH):
-            self.create_new_issue_branch(repo)
+            if not self.should_create_new_branch():
+                print("Branch not created. Exiting program.")
+                exit()
+
+            curr_branch = repo.head.ref
+            repo.git.checkout("--orphan", self.ISSUE_BRANCH)
+            repo.git.rm("-rf", "--cached", ".")
+            self.commit("created_issue_branch", new_branch=True)
+            repo.git.push("-u", "origin", self.ISSUE_BRANCH)
+            curr_branch.checkout(force=True)
 
         worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
 

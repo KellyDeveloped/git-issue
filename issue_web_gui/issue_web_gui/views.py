@@ -29,9 +29,9 @@ def create_issue_form():
         issue = Issue()
         issue.summary = form.summary.data
         issue.description = form.description.data
-        issue.reporter = GitUser(form.reporter_email.data)
-        issue.assignee = GitUser(form.assignee_email.data) if form.assignee_email.data != "" else None
-        issue = handler.store_issue(issue, "edit")
+        issue.reporter = GitUser(form.reporter.data) if form.reporter.data != "" else GitUser()
+        issue.assignee = GitUser(form.assignee.data) if form.assignee.data != "" else None
+        issue = handler.store_issue(issue, "edit", generate_id=True)
         
         return render_template("single_issue.html", issue=issue)
 
@@ -46,8 +46,8 @@ def edit_issue_form(id):
         issue.id = id
         issue.summary = form.summary.data
         issue.description = form.description.data
-        issue.reporter = GitUser(form.reporter_email.data) if form.reporter_email.data != "" else None
-        issue.assignee = GitUser(form.assignee_email.data) if form.assignee_email.data != "" else None
+        issue.reporter = GitUser(form.reporter.data) if form.reporter.data != "" else None
+        issue.assignee = GitUser(form.assignee.data) if form.assignee.data != "" else None
         issue.status = form.status.data
         
         user = GitUser()
@@ -74,12 +74,10 @@ def edit_issue_form(id):
     form.subscribed.data = False # This needs changed to check if git user is subscribed
     
     if (issue.reporter is not None):
-        form.reporter_email.data = issue.reporter.email
+        form.reporter.data = issue.reporter.email
 
     if (issue.assignee is not None):
-        form.assignee_email.data = issue.assignee.email
-
-    form = EditForm(obj=issue)
+        form.assignee.data = issue.assignee.email
 
     return render_template("edit_issue.html", form=form, issue=issue)
 
