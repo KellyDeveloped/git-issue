@@ -115,13 +115,11 @@ class GitManager(object):
                 exit()
 
         if not os.path.exists(path) and not os.path.exists(worktree_path):
-            if (has_local_branch):
-                repo.git.worktree("add", path, self.ISSUE_BRANCH)
-            elif (has_remote):
-                print ("REMOTE WORKTREE BEING USED -@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-@-")
-                repo.git.worktree("add", "--checkout", path, f"origin/{self.ISSUE_BRANCH}")
-            else:
-                raise RuntimeError("The branch exists neither locally nor remotely. This should not be possible.")
+            if has_remote and not has_local_branch:
+                repo.git.branch("-f", self.ISSUE_BRANCH, f"origin/{self.ISSUE_BRANCH}")
+
+            repo.git.worktree("add", path, self.ISSUE_BRANCH)
+
         if os.path.exists(path):
             os.chdir(path)
 
@@ -158,7 +156,7 @@ class GitManager(object):
         repo = self.obtain_repo()
         print("Pulling from issue branch.")
         try:
-            repo.git.pull()
+            repo.git.pull("origin", self.ISSUE_BRANCH)
         except git.exc.GitCommandError as e:
             print("Failed to pull from issue branch. See error below.")
             print(e)            
