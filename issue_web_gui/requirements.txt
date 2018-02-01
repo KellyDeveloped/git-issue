@@ -1,2 +1,3 @@
 Flask<1
+Flask-WTF >= 0.12.2
 GitPython >= 2.1.7
