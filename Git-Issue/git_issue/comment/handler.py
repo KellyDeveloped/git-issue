@@ -48,13 +48,13 @@ class CommentHandler(object):
             self.index.add_entry(path, comment)
             self.index.store_index()
 
-        gm.perform_git_workflow(action, True, gen_paths, "add_comment", self.issue_id)
+        return gm.perform_git_workflow(action, True, gen_paths, "add_comment", self.issue_id)
 
     def get_comment(self, comment_id) -> Comment:
         entry = self.index.get_entry(self.generate_comment_path(comment_id))
         return self._get_comment(entry)
 
-    def get_comment_range(self, range: int) -> [Comment]:
+    def get_comment_range(self, range: int = 10, start_pos: int = 0) -> [Comment]:
         generator = self.index.generate_range(range)
         return self._get_list_of_comments(next(generator))
 

@@ -27,20 +27,33 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="issue_web_gui\api\issue\schemas.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="issue_web_gui\api\issue\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="issue_web_gui\forms.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="issue_web_gui\api\issue\requests.py" />
+    <Compile Include="issue_web_gui\api\__init__.py" />
     <Compile Include="runserver.py" />
     <Compile Include="issue_web_gui\__init__.py" />
     <Compile Include="issue_web_gui\views.py" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="issue_web_gui\" />
+    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\api\" />
+    <Folder Include="issue_web_gui\api\" />
+    <Folder Include="issue_web_gui\api\issue\" />
+    <Folder Include="issue_web_gui\REST\" />
     <Folder Include="issue_web_gui\static\" />
     <Folder Include="issue_web_gui\static\content\" />
     <Folder Include="issue_web_gui\static\fonts\" />
     <Folder Include="issue_web_gui\static\scripts\" />
     <Folder Include="issue_web_gui\templates\" />
+    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\REST\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="issue_web_gui\templates\all_issues.html" />

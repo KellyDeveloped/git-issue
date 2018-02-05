@@ -1,3 +1,5 @@
 Flask<1
+flask-restplus
+flask-restplus-marshmallow
 Flask-WTF >= 0.12.2
 GitPython >= 2.1.7

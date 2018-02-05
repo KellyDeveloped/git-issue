@@ -30,7 +30,8 @@ def generate_issue_id():
 
 
 def does_issue_exist(id):
-    return _generate_issue_file_path(id).exists()
+    gm = GitManager()
+    return gm.perform_git_workflow(lambda : _generate_issue_file_path(id).exists())
 
 
 def get_issue(id):
@@ -69,11 +70,18 @@ def store_issue(issue, cmd, generate_id=False):
 
 def add_comment(issue_id, comment):
     handler = CommentHandler(_generate_issue_folder_path(issue_id), issue_id)
-    handler.add_comment(comment)
+    return handler.add_comment(comment)
 
 
-def get_comments(issue):
-    pass
+def get_comment_range(issue_id, range: int, start_pos: int = 0):
+    gm = GitManager()
+
+    def action():
+        handler = CommentHandler(_generate_issue_folder_path(issue_id), issue_id)
+        return handler.get_comment_range(range, start_pos)
+
+    return gm.perform_git_workflow(action)
+
 
 
 def display_issue(issue, with_comments=False):

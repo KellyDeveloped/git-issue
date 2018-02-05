@@ -33,7 +33,6 @@
     <Compile Include="git_issue\comment\index.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="git_issue\comment\index_entry.py" />
     <Compile Include="git_issue\comment\__init__.py">
       <SubType>Code</SubType>
     </Compile>

@@ -42,8 +42,8 @@ class Index(object):
     def get_entries(self) -> [IndexEntry]:
         return self.entries.copy()
 
-    def generate_range(self, volume: int):
-        pos = 0
+    def generate_range(self, volume: int, start_pos:int = 0):
+        pos = start_pos
         offset = volume
         no_of_entries = len(self.entries)
 
