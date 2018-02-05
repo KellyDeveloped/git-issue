@@ -1,0 +1,16 @@
+<div class="card">
+  <div class=card-header id="issue-id" data-id="{{ issue?.id }}">ID: {{ issue?.id }}</div>
+  <div class="card-body">
+    <div class=flash><strong>Summary: </strong>{{ issue?.summary }}</div>
+    <div class="flash"><strong>Description: </strong>{{ issue?.description }}</div>
+    <div class=flash><strong>Status: </strong> {{ issue?.status }}</div>
+    <div class=flash><strong>Assignee: </strong>{{ issue?.assignee?.user }}, {{ issue?.assignee?.email }}</div>
+    <div class=flash>
+      <strong>Reporter: </strong>{{ issue?.reporter?.user }}, {{ issue?.reporter?.email }}
+    </div>
+    <strong>Subscribers: </strong>
+    <div class=flash>
+      <!-- Subscribers go here -->
+    </div>
+  </div>
+</div>
