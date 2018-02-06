@@ -1,0 +1,23 @@
+{
+    "id": "ISSUE-4",
+    "date": "2018-02-06T15:55:24.568150",
+    "summary": "Can GIT integration tests be ran on Travis?",
+    "description": "Not sure if this is entirely do-able. You can run custom scripts post-build but would that suffice?\n\nIt needs to use GIT to checkout the build, so we know GIT is there. The question is - can we access it via scripts? If we can then that'd be a big help.",
+    "status": "open",
+    "assignee": null,
+    "reporter": {
+        "user": "Liam Cairns Kelly",
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        },
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
+    "attachments": []
+}
