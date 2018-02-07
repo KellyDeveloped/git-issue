@@ -1,15 +1,18 @@
 {
     "id": "ISSUE-5",
     "date": "2018-02-07T16:53:41.777458",
-    "summary": "This isn't a real issue",
-    "description": "Testing to see if it'll be created",
-    "status": "string",
-    "assignee": {
-        "user": "string"
-    },
+    "summary": "Investigation on ways to utilise the GIT integration",
+    "description": "The greatest advantage we have over other solutions is our integration with GIT.\n\nHowever we're not utilising git to its full potential. For example, we could \"start work\" on an issue; creating an identifiable branch that we can track the progress of via Git Issue.\n\nIs there anything else we can do to use GIT better?",
+    "status": "open",
+    "assignee": null,
     "reporter": {
-        "user": "string"
+        "email": "liamcairnskelly@gmail.com"
     },
-    "subscribers": [],
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
     "attachments": []
 }
