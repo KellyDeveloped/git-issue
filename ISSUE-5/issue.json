@@ -1,0 +1,15 @@
+{
+    "id": "ISSUE-5",
+    "date": "2018-02-07T16:53:41.777458",
+    "summary": "This isn't a real issue",
+    "description": "Testing to see if it'll be created",
+    "status": "string",
+    "assignee": {
+        "user": "string"
+    },
+    "reporter": {
+        "user": "string"
+    },
+    "subscribers": [],
+    "attachments": []
+}
