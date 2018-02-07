@@ -8,6 +8,11 @@
     "reporter": {
         "email": "liamcairnskelly@gmail.com"
     },
-    "subscribers": [],
+    "subscribers": [
+        {
+            "email": "liamcairnskelly@gmail.com",
+            "user": "Liam Cairns Kelly"
+        }
+    ],
     "attachments": []
 }
