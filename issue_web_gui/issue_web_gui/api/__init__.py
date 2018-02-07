@@ -1,11 +1,7 @@
 from flask import Blueprint
 from flask_restplus import Api
+from flask_cors import CORS
 
 bp = Blueprint('api', __name__)
+cors = CORS(bp)
 api = Api(bp)
-
-@bp.after_request
-def add_cors(response):
-    header = response.headers
-    header['Access-Control-Allow-Origin'] = '*'
-    return response

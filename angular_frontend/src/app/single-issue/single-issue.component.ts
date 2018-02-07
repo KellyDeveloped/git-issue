@@ -18,8 +18,8 @@ export class SingleIssueComponent implements OnInit {
 
 	ngOnInit() {
 		const id = this.route.snapshot.paramMap.get("id")
-		this.issueService.getIssue(id).subscribe((i) => {
-			this.issue = i
+		this.issueService.getIssue(id).subscribe((res) => {
+			this.issue = res.payload
 		})
 	}
 

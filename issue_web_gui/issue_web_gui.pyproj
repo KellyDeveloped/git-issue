@@ -18,7 +18,12 @@
     <RootNamespace>issue_web_gui</RootNamespace>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
     <WebBrowserPort>5555</WebBrowserPort>
-    <Environment>FLASK_DEBUG=1</Environment>
+    <Environment>
+    </Environment>
+    <PythonRunWebServerCommandEnvironment>
+    </PythonRunWebServerCommandEnvironment>
+    <PythonDebugWebServerCommandEnvironment>
+    </PythonDebugWebServerCommandEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -51,6 +56,11 @@
     <Folder Include="issue_web_gui\api\issue\" />
     <Folder Include="issue_web_gui\REST\" />
     <Folder Include="issue_web_gui\static\" />
+    <Folder Include="issue_web_gui\static\angular\" />
+    <Folder Include="issue_web_gui\static\angular\src\" />
+    <Folder Include="issue_web_gui\static\angular\src\app\" />
+    <Folder Include="issue_web_gui\static\angular\src\assets\" />
+    <Folder Include="issue_web_gui\static\angular\src\environments\" />
     <Folder Include="issue_web_gui\static\content\" />
     <Folder Include="issue_web_gui\static\fonts\" />
     <Folder Include="issue_web_gui\static\scripts\" />

@@ -1,3 +1,35 @@
-<p>
-  edit-issue works!
-</p>
+<mat-card>
+	<mat-card-title>Edit Issue {{ issue?.id }}</mat-card-title>
+	<mat-card-content>
+		<form [formGroup]="issueForm" class="container">
+			<mat-form-field>
+				<input matInput placeholder="Summary" formControlName="summary" />
+				<mat-error *ngIf="issueForm.invalid">{{ getSummaryErrorMessage() }}</mat-error>
+			</mat-form-field>
+
+			<mat-form-field>
+				<textarea matInput placeholder="Description" formControlName="description"></textarea>
+			</mat-form-field>
+
+			<mat-form-field>
+				<input matInput placeholder="Assignee" formControlName="assignee" />
+			</mat-form-field>
+
+			<mat-form-field>
+				<input matInput placeholder="Reporter" formControlName="reporter" />
+			</mat-form-field>
+
+			<mat-form-field>
+				<mat-select placeholder="Issue Status" formControlName="status">
+					<mat-option *ngFor="let status of statusIndicators" [value]="status">
+						{{ status }}
+					</mat-option>
+				</mat-select>
+			</mat-form-field>
+
+			<mat-checkbox formControlName="subscribed">Subscribe</mat-checkbox>
+		</form>
+
+		<button mat-button color="primary" type="submit" (click)="submit()" [disabled]="issueForm.invalid">Submit</button>
+	</mat-card-content>
+</mat-card>

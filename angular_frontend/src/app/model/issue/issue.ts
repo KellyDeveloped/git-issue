@@ -4,6 +4,7 @@ export class Issue {
 
 	id: string;
 	date: string;
+	status: string;
 	summary: string;
 	description: string;
 	reporter: GitUser;

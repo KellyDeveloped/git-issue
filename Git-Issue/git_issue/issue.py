@@ -18,3 +18,5 @@ class Issue(object):
         self.reporter:GitUser = reporter
         self.subscribers:[GitUser] = subscribers
         self.attachments = attachments
+
+status_indicators = ["open", "closed", "in progress"]

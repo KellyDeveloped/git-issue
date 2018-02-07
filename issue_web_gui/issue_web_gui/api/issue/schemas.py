@@ -3,9 +3,11 @@ from flask_restplus import fields as rfields
 from issue_web_gui.api import api
 from issue import Issue
 
+from gituser import GitUser
+
 class GitUserSchema(Schema):
     user = fields.Str()
-    email = fields.Email(required=True)
+    email = fields.Email()
 
     user_fields = {
                 'user': rfields.String,
@@ -61,3 +63,18 @@ class CommentSchema(Schema):
         }
 
 comment_fields = api.model('Comment', CommentSchema.create_fields)
+
+class Payload(object):
+
+    def __init__(self, user: GitUser, payload):
+        self.user = user
+        self.payload = payload
+
+def to_payload(current_user, obj, schema_type: Schema, hasMany=False):
+    class PayloadSchema(Schema):
+        user = fields.Nested(GitUserSchema)
+        payload = fields.Nested(schema_type)
+
+    ps = PayloadSchema()
+    #{ "user": gu, "payload": obj}
+    return ps.dump(Payload(current_user, obj), many=hasMany)

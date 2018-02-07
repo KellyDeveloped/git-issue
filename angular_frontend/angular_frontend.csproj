@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove=".gitignore" />
     <None Remove="src\app\app.config.ts" />
     <None Remove="src\app\model\issue.class.ts" />
     <None Remove="src\app\model\issue\comment.ts" />
@@ -37,7 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include=".gitignore" />
     <None Include="README.md" />
     
   </ItemGroup>
