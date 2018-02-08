@@ -1,103 +1,36 @@
-<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" DefaultTargets="Build">
   <PropertyGroup>
-    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>090e2c14-6c23-4e6a-8662-6b8d34927aa6</ProjectGuid>
-    <ProjectHome>.</ProjectHome>
-    <ProjectTypeGuids>{789894c7-04a9-4a11-a6b5-3f4435165112};{1b580a1a-fdb3-4b32-83e1-6407eb2722e6};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <ProjectGuid>{c9172f02-8bc7-4565-88dc-d37112cb9725}</ProjectGuid>
+    <ProjectHome>..\issue_web_gui\</ProjectHome>
     <StartupFile>runserver.py</StartupFile>
-    <SearchPath>..\Git-Issue\git_issue</SearchPath>
+    <SearchPath>..\Git-Issue\git_issue\</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
-    <LaunchProvider>Web launcher</LaunchProvider>
-    <WebBrowserUrl>http://localhost</WebBrowserUrl>
     <OutputPath>.</OutputPath>
-    <SuppressCollectPythonCloudServiceFiles>true</SuppressCollectPythonCloudServiceFiles>
-    <Name>issue_web_gui</Name>
-    <RootNamespace>issue_web_gui</RootNamespace>
-    <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
-    <WebBrowserPort>5555</WebBrowserPort>
-    <Environment>
-    </Environment>
-    <PythonRunWebServerCommandEnvironment>
-    </PythonRunWebServerCommandEnvironment>
-    <PythonDebugWebServerCommandEnvironment>
-    </PythonDebugWebServerCommandEnvironment>
+    <ProjectTypeGuids>{789894c7-04a9-4a11-a6b5-3f4435165112};{1b580a1a-fdb3-4b32-83e1-6407eb2722e6};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
+    <LaunchProvider>Web launcher</LaunchProvider>
+    <InterpreterId>MSBuild|issue_web_gui|$(MSBuildProjectFullPath)</InterpreterId>
+    <WebBrowserUrl>http://localhost:5555</WebBrowserUrl>
+    <PythonWsgiHandler>{StartupModule}.wsgi_app</PythonWsgiHandler>
+    <UseIISExpress>true</UseIISExpress>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
-    <DebugSymbols>true</DebugSymbols>
-    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-    <DebugSymbols>true</DebugSymbols>
-    <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'" />
+  <PropertyGroup>
+    <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="issue_web_gui\api\issue\schemas.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="issue_web_gui\api\issue\__init__.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="issue_web_gui\forms.py">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="issue_web_gui\api\issue\requests.py" />
-    <Compile Include="issue_web_gui\api\__init__.py" />
-    <Compile Include="runserver.py" />
-    <Compile Include="issue_web_gui\__init__.py" />
-    <Compile Include="issue_web_gui\views.py" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="issue_web_gui\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\api\" />
-    <Folder Include="issue_web_gui\api\" />
-    <Folder Include="issue_web_gui\api\issue\" />
-    <Folder Include="issue_web_gui\REST\" />
-    <Folder Include="issue_web_gui\static\" />
-    <Folder Include="issue_web_gui\static\angular\" />
-    <Folder Include="issue_web_gui\static\angular\src\" />
-    <Folder Include="issue_web_gui\static\angular\src\app\" />
-    <Folder Include="issue_web_gui\static\angular\src\assets\" />
-    <Folder Include="issue_web_gui\static\angular\src\environments\" />
-    <Folder Include="issue_web_gui\static\content\" />
-    <Folder Include="issue_web_gui\static\fonts\" />
-    <Folder Include="issue_web_gui\static\scripts\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\static\angular\src\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\static\angular\src\app\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\static\angular\src\assets\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\static\angular\src\environments\" />
-    <Folder Include="issue_web_gui\templates\" />
-    <Folder Include="D:\git-issue\issue_web_gui\issue_web_gui\REST\" />
-    <Folder Include="issue_web_gui\templates\comments\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="issue_web_gui\templates\all_issues.html" />
-    <Content Include="issue_web_gui\templates\comments\add-comment.html" />
-    <Content Include="issue_web_gui\templates\comments\comment-list.html" />
-    <Content Include="issue_web_gui\templates\comments\comment.html" />
-    <Content Include="issue_web_gui\templates\create_issue.html" />
-    <Content Include="issue_web_gui\templates\edit_issue.html" />
-    <Content Include="issue_web_gui\templates\error_page.html" />
-    <Content Include="issue_web_gui\templates\issue.html">
-      <SubType>Code</SubType>
-    </Content>
-    <Content Include="issue_web_gui\templates\single_issue.html" />
-    <Content Include="requirements.txt" />
     <Content Include="issue_web_gui\static\content\bootstrap.css" />
     <Content Include="issue_web_gui\static\content\bootstrap.min.css" />
     <Content Include="issue_web_gui\static\content\site.css" />
-    <Content Include="issue_web_gui\static\fonts\glyphicons-halflings-regular.eot" />
     <Content Include="issue_web_gui\static\fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="issue_web_gui\static\fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="issue_web_gui\static\fonts\glyphicons-halflings-regular.woff" />
     <Content Include="issue_web_gui\static\scripts\bootstrap.js" />
     <Content Include="issue_web_gui\static\scripts\bootstrap.min.js" />
     <Content Include="issue_web_gui\static\scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="issue_web_gui\static\scripts\jquery-1.10.2.js" />
     <Content Include="issue_web_gui\static\scripts\jquery-1.10.2.min.js" />
-    <Content Include="issue_web_gui\static\scripts\jquery-1.10.2.min.map" />
     <Content Include="issue_web_gui\static\scripts\jquery.validate-vsdoc.js" />
     <Content Include="issue_web_gui\static\scripts\jquery.validate.js" />
     <Content Include="issue_web_gui\static\scripts\jquery.validate.min.js" />
@@ -108,35 +41,65 @@
     <Content Include="issue_web_gui\static\scripts\respond.min.js" />
     <Content Include="issue_web_gui\static\scripts\_references.js" />
     <Content Include="issue_web_gui\templates\about.html" />
+    <Content Include="issue_web_gui\templates\all_issues.html" />
     <Content Include="issue_web_gui\templates\contact.html" />
+    <Content Include="issue_web_gui\templates\create_issue.html" />
+    <Content Include="issue_web_gui\templates\edit_issue.html" />
+    <Content Include="issue_web_gui\templates\error_page.html" />
     <Content Include="issue_web_gui\templates\index.html" />
+    <Content Include="issue_web_gui\templates\issue.html" />
     <Content Include="issue_web_gui\templates\layout.html" />
+    <Content Include="issue_web_gui\templates\single_issue.html" />
+    <Content Include="obj\Debug\issue_web_gui.pyproj.FileListAbsolute.txt" />
+    <Content Include="requirements.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="issue_web_gui\api\issue\requests.py" />
+    <Compile Include="issue_web_gui\api\issue\schemas.py" />
+    <Compile Include="issue_web_gui\api\issue\__init__.py" />
+    <Compile Include="issue_web_gui\api\__init__.py" />
+    <Compile Include="issue_web_gui\forms.py" />
+    <Compile Include="issue_web_gui\views.py" />
+    <Compile Include="issue_web_gui\__init__.py" />
+    <Compile Include="runserver.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="issue_web_gui" />
+    <Folder Include="issue_web_gui\api" />
+    <Folder Include="issue_web_gui\api\issue" />
+    <Folder Include="issue_web_gui\static\" />
+    <Folder Include="issue_web_gui\static\content" />
+    <Folder Include="issue_web_gui\static\fonts" />
+    <Folder Include="issue_web_gui\static\scripts" />
+    <Folder Include="issue_web_gui\templates" />
+    <Folder Include="obj\" />
+    <Folder Include="obj\Debug" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
-      <Id>env</Id>
-      <Version>3.7</Version>
+      <Id>issue_web_gui</Id>
       <Description>env (Python36)</Description>
       <InterpreterPath>Scripts\python.exe</InterpreterPath>
       <WindowsInterpreterPath>Scripts\pythonw.exe</WindowsInterpreterPath>
-      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
+      <Version>3.7</Version>
       <Architecture>X64</Architecture>
+      <PathEnvironmentVariable>PYTHONPATH</PathEnvironmentVariable>
     </Interpreter>
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.Web.targets" />
-  <!-- Specify pre- and post-build commands in the BeforeBuild and 
-       AfterBuild targets below. -->
-  <Target Name="BeforeBuild">
-  </Target>
-  <Target Name="AfterBuild">
-  </Target>
   <ProjectExtensions>
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
+          <UseIIS>True</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
-          <UseCustomServer>True</UseCustomServer>
-          <CustomServerUrl>http://localhost</CustomServerUrl>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:10673/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
           <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
         </WebProjectProperties>
       </FlavorProperties>
@@ -157,7 +120,7 @@
           </StartCmdLineArguments>
           <StartWorkingDirectory>
           </StartWorkingDirectory>
-          <EnableENC>False</EnableENC>
+          <EnableENC>True</EnableENC>
           <AlwaysStartWebServerOnDebug>False</AlwaysStartWebServerOnDebug>
         </WebProjectProperties>
       </FlavorProperties>

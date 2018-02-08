@@ -1,16 +1,22 @@
-<div class="card">
-  <div class=card-header id="issue-id" data-id="{{ issue?.id }}">ID: {{ issue?.id }}</div>
-  <div class="card-body">
-    <div class=flash><strong>Summary: </strong>{{ issue?.summary }}</div>
-    <div class="flash"><strong>Description: </strong>{{ issue?.description }}</div>
-    <div class=flash><strong>Status: </strong> {{ issue?.status }}</div>
-    <div class=flash><strong>Assignee: </strong>{{ issue?.assignee?.user }}, {{ issue?.assignee?.email }}</div>
-    <div class=flash>
-      <strong>Reporter: </strong>{{ issue?.reporter?.user }}, {{ issue?.reporter?.email }}
-    </div>
-    <strong>Subscribers: </strong>
-    <div class=flash>
-      <!-- Subscribers go here -->
-    </div>
-  </div>
-</div>
+<mat-card style="margin: 16px">
+	<mat-card-title-group color="primary">
+		<mat-card-title id="issue-id" data-id="{{ issue?.id }}">ID: {{ issue?.id }}</mat-card-title>
+		<mat-card-subtitle>{{ issue?.summary }}</mat-card-subtitle>
+	</mat-card-title-group>
+	<mat-card-content>
+		<div class="flash"><strong>Description: </strong>{{ issue?.description }}</div>
+		<div class=flash><strong>Status: </strong> {{ issue?.status }}</div>
+		<div class=flash><strong>Assignee: </strong>{{ issue?.assignee?.user }}, {{ issue?.assignee?.email }}</div>
+		<div class=flash>
+			<strong>Reporter: </strong>{{ issue?.reporter?.user }}, {{ issue?.reporter?.email }}
+		</div>
+		<strong>Subscribers: </strong>
+		<div class=flash>
+			<!-- Subscribers go here -->
+		</div>
+	</mat-card-content>
+	<mat-card-actions>
+		<a mat-button color="primary" [routerLink]="viewLink">VIEW</a>
+		<a mat-button color="primary" [routerLink]="editLink">EDIT</a>
+	</mat-card-actions>
+</mat-card>

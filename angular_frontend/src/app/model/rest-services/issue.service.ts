@@ -23,7 +23,7 @@ export class IssueService {
 
 	getAllIssues() {
 		let url = config.issuesUrl;
-		return this.http.get<Array<Issue>>(url);
+		return this.http.get<Payload<Array<Issue>>>(url);
 	}
 
 	getStatusIndicators(): Observable<Array<string>> {

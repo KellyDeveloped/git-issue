@@ -1,5 +1,6 @@
 Flask<1
-flask-restplus
-flask-restplus-marshmallow
+flask-cors >= 3.0.3
+flask-restplus >= 0.10.1
+flask-restplus-marshmallow >= 0.2.11
 Flask-WTF >= 0.12.2
 GitPython >= 2.1.7

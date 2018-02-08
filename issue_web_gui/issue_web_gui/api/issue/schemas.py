@@ -70,11 +70,11 @@ class Payload(object):
         self.user = user
         self.payload = payload
 
-def to_payload(current_user, obj, schema_type: Schema, hasMany=False):
+def to_payload(current_user, obj, schema_type: Schema, many=False):
     class PayloadSchema(Schema):
         user = fields.Nested(GitUserSchema)
-        payload = fields.Nested(schema_type)
+        payload = fields.Nested(schema_type, many=many)
 
     ps = PayloadSchema()
     #{ "user": gu, "payload": obj}
-    return ps.dump(Payload(current_user, obj), many=hasMany)
+    return ps.dump(Payload(current_user, obj))

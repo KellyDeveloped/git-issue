@@ -1,3 +1,7 @@
-<div *ngFor="let issue of issues">
-	<app-issue [issue]="issue"></app-issue>
-</div>
+<mat-list>
+	<div *ngFor="let issue of issues">
+		<mat-list-item>
+			<app-issue-list-entry [issue]="issue"></app-issue-list-entry>
+		</mat-list-item>
+	</div>
+</mat-list>
