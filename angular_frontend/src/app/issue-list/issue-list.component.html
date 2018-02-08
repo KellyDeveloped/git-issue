@@ -1,7 +1,24 @@
-<mat-list>
-	<div *ngFor="let issue of issues">
-		<mat-list-item>
-			<app-issue-list-entry [issue]="issue"></app-issue-list-entry>
-		</mat-list-item>
-	</div>
-</mat-list>
+<div style="display: flex; justify-content:center">
+	<mat-card style="width:1000px">
+		<mat-list>
+			<mat-list-item *ngFor="let issue of issues; index as i" style="margin:16px 0">
+				<div matLine>
+					<div class="container flex-row flex-align-center">
+						<span class="mat-h2" style="margin:0">{{ issue?.id }}</span>
+						<span class="mat-body-1 " style="text-align:end; align-self:center">Status: {{ issue?.status }}</span>
+					</div>
+				</div>
+				<div matLine>
+					<span class="mat-body-1">{{ issue?.summary }}</span>
+				</div>
+				<div matLine style="margin-bottom: 16px">
+					<div class="container flex-row-reverse">
+						<a mat-button style="width:auto;">View</a>
+						<a mat-button style="width:auto;">Edit</a>
+					</div>
+				</div>
+				<mat-divider *ngIf="i + 1 !== issues.length"></mat-divider>
+			</mat-list-item>
+		</mat-list>
+	</mat-card>
+</div>

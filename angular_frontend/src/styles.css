@@ -10,7 +10,26 @@ body, html {
 
 .container {
 	display: flex;
-	flex-direction: column;
+}
+
+.flex-column {
+	flex-direction: column
+}
+
+.flex-row {
+	flex-direction: row
+}
+
+.flex-row-reverse {
+	flex-direction: row-reverse
+}
+
+.flex-align-center {
+	align-items: center
+}
+
+.flex-item-right {
+	align-self: flex-end;
 }
 
 .container > * {

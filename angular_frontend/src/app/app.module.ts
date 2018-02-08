@@ -13,6 +13,7 @@ import { MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
+import { MatDividerModule } from '@angular/material/divider';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -59,6 +60,7 @@ import { IssueListEntryComponent } from './issue-list-entry/issue-list-entry.com
 		MatSelectModule,
 		MatToolbarModule,
 		MatListModule,
+		MatDividerModule,
 		BrowserAnimationsModule
 	],
 	providers: [],
