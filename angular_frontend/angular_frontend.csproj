@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="C:\Users\Liam\.nuget\packages\afomindotcom.ngprojecttemplate.server\1.0.5\build\..\tools\AspNetToNgRedirector.cs" />
+    <!--<Compile Remove="C:\Users\Liam\.nuget\packages\afomindotcom.ngprojecttemplate.server\1.0.5\build\..\tools\AspNetToNgRedirector.cs" />-->
   </ItemGroup>
 
   <ItemGroup>

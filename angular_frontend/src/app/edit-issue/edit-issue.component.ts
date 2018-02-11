@@ -78,7 +78,7 @@ export class EditIssueComponent implements OnInit {
 	}
 
 	ngOnInit(): void {
-		const id = this.route.snapshot.paramMap.get("id")
+		const id = this.route.snapshot.paramMap.get("id");
 
 		this.issueService.getStatusIndicators().subscribe(res => this.statusIndicators = res);
 

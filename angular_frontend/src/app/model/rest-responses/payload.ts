@@ -1,4 +1,4 @@
-import { GitUser } from './git-user';
+import { GitUser } from '../issue/git-user';
 
 export class Payload<T> {
 

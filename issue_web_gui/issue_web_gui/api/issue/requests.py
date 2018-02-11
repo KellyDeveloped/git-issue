@@ -13,7 +13,7 @@ from werkzeug.exceptions import BadRequest
 from http import HTTPStatus
 import hashlib
 
-from .schemas import IssueSchema, issue_create_fields, issue_edit_fields, GitUserSchema, CommentSchema, comment_fields, to_payload
+from .schemas import IssueSchema, issue_create_fields, issue_edit_fields, GitUserSchema, CommentSchema, comment_fields, to_payload, IssueListSchema
 
 import issue_handler as handler
 from issue import Issue, status_indicators
@@ -22,11 +22,29 @@ from gituser import GitUser
 from datetime import datetime
 
 
+page_args = {
+    'page': fields.Integer(),
+    'limit': fields.Integer()
+}
+
+
+class IssueList(object):
+    def __init__(self, count: int, issues: Issue):
+        self.count = count;
+        self.issues = issues;
+
 @api.route('/issues')
 class IssueListAPI(Resource):
-    def get(self):
-        issues = handler.get_all_issues()
-        result = to_payload(GitUser(), issues, IssueSchema, many=True)
+
+    @use_args(page_args)
+    def get(self, args):
+        page = args.get("page", 1)
+        limit = args.get("limit", 10)
+
+        issues, count = handler.get_issue_range(page, limit)
+        response = IssueList(count, issues);
+
+        result = to_payload(GitUser(), response, IssueListSchema)
         return result.data
 
     @api.expect(issue_create_fields)
@@ -92,13 +110,6 @@ class IssueAPI(Resource):
             issue = handler.store_issue(updated_issue, "edit")
 
         return regular_schema.dump(issue), HTTPStatus.OK
-        
-
-
-page_args = {
-    'page': fields.Integer(),
-    'limit': fields.Integer()
-}
 
 
 @api.route('/issues/<string:id>/comments')
@@ -141,6 +152,7 @@ class CommentListAPI(Resource):
         result = schema.dump(comment)
 
         return result.data
+
 
 @api.route('/status-indicators')
 class StatusIndicatorsAPI(Resource):

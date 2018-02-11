@@ -52,6 +52,11 @@ class IssueSchema(Schema):
 issue_create_fields = api.model('Create Issue', IssueSchema.create_fields)
 issue_edit_fields = api.model('Edit Issue', IssueSchema.edit_fields) 
 
+class IssueListSchema(Schema):
+
+    count = fields.Int()
+    issues = fields.Nested(IssueSchema, many=True)
+
 class CommentSchema(Schema):
     comment = fields.Str()
     user = fields.Nested(GitUserSchema)

@@ -28,6 +28,10 @@ body, html {
 	align-items: center
 }
 
+.flex-justify-center {
+	justify-content: center;
+}
+
 .flex-item-right {
 	align-self: flex-end;
 }

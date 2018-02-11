@@ -1,13 +1,14 @@
-import { Injectable } from '@angular/core'
+import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 
-import { Observable } from 'rxjs/Observable'
+import { Observable } from 'rxjs/Observable';
 
-import { Payload } from '../issue/payload'
-import { Issue } from '../issue/issue'
-import { Comment } from '../issue/comment'
+import { Payload } from '../rest-responses/payload';
+import { IssueList } from '../rest-responses/issue-list';
+import { Issue } from '../issue/issue';
+import { Comment } from '../issue/comment';
 
-import config = require('../../app.config')
+import config = require('../../app.config');
 
 @Injectable()
 export class IssueService {
@@ -16,14 +17,14 @@ export class IssueService {
 		
 	}
 
-	getIssue(issueID: string) {
+	getIssue(issueID: string): Observable<Payload<Issue>> {
 		let url = config.specificIssueUrl(issueID);
 		return this.http.get<Payload<Issue>>(url);
 	}
 
-	getAllIssues() {
-		let url = config.issuesUrl;
-		return this.http.get<Payload<Array<Issue>>>(url);
+	getIssuePage(page: number = 1, limit: number = 10): Observable<Payload<IssueList>> {
+		let url = config.issuePageUrl(page, limit)
+		return this.http.get<Payload<IssueList>>(url);
 	}
 
 	getStatusIndicators(): Observable<Array<string>> {

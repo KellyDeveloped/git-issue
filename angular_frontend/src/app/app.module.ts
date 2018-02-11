@@ -14,6 +14,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -29,6 +30,9 @@ import { CreateCommentComponent } from './create-comment/create-comment.componen
 import { SingleIssueComponent } from './single-issue/single-issue.component';
 import { HeaderComponent } from './header/header.component';
 import { IssueListEntryComponent } from './issue-list-entry/issue-list-entry.component';
+
+import { IssueService } from './model/rest-services/issue.service';
+import { IssueCacheService } from './model/services/issue-cache.service';
 
 @NgModule({
 	declarations: [
@@ -61,9 +65,13 @@ import { IssueListEntryComponent } from './issue-list-entry/issue-list-entry.com
 		MatToolbarModule,
 		MatListModule,
 		MatDividerModule,
+		MatProgressSpinnerModule,
 		BrowserAnimationsModule
 	],
-	providers: [],
+	providers: [
+		IssueService,
+		IssueCacheService
+	],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

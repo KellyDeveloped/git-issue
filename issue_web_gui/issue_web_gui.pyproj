@@ -15,6 +15,7 @@
     <WebBrowserUrl>http://localhost:5555</WebBrowserUrl>
     <PythonWsgiHandler>{StartupModule}.wsgi_app</PythonWsgiHandler>
     <UseIISExpress>true</UseIISExpress>
+    <PythonRunWebServerCommandEnvironment>FLASK_DEBUG=1</PythonRunWebServerCommandEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />

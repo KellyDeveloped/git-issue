@@ -52,6 +52,20 @@ def get_all_issues():
 
     return gm.perform_git_workflow(action)
 
+def get_issue_range(page: int = 1, limit: int = 10):
+    gm = GitManager()
+
+    def action():
+        start_pos = (page - 1) * limit
+        end = start_pos + limit
+
+        path = Path.cwd()
+        dirs = [d for d in path.iterdir() if d.is_dir() and d.match("ISSUE-*")]
+        range = dirs[start_pos : end]
+        return [JsonConvert.FromFile(_generate_issue_file_path(i.parts[-1])) for i in range], len(dirs)
+
+    return gm.perform_git_workflow(action)
+        
 
 def store_issue(issue, cmd, generate_id=False):
     gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]

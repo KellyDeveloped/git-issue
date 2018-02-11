@@ -1,1 +1,6 @@
-<app-issue [issue]="issue"></app-issue>
+<div *ngIf="issue">
+	<app-issue [issue]="issue"></app-issue>
+</div>
+<div *ngIf="!issue" class="container flex-align-center flex-justify-center" style="width:100%; height:50%">
+	<mat-spinner></mat-spinner>
+</div>
