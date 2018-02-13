@@ -1,20 +1,20 @@
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { IssueListEntryComponent } from './issue-list-entry.component';
+import { ErrorDialogueComponent } from './error-dialogue.component';
 
-describe('IssueListEntryComponent', () => {
-  let component: IssueListEntryComponent;
-  let fixture: ComponentFixture<IssueListEntryComponent>;
+describe('ErrorDialogueComponent', () => {
+  let component: ErrorDialogueComponent;
+  let fixture: ComponentFixture<ErrorDialogueComponent>;
 
   beforeEach(async(() => {
     TestBed.configureTestingModule({
-      declarations: [ IssueListEntryComponent ]
+      declarations: [ ErrorDialogueComponent ]
     })
     .compileComponents();
   }));
 
   beforeEach(() => {
-    fixture = TestBed.createComponent(IssueListEntryComponent);
+    fixture = TestBed.createComponent(ErrorDialogueComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

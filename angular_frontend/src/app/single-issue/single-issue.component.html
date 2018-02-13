@@ -1,6 +1,11 @@
-<div *ngIf="issue">
-	<app-issue [issue]="issue"></app-issue>
+<div class="container flex-justify-center">
+	<div *ngIf="issue" class="root-container container inner-margins flex-column flex-justify-center">
+		<app-issue [issue]="issue"></app-issue>
+		<div style="width:1000px"><app-create-comment></app-create-comment></div>
+		<app-comment-list [issue]="issue"></app-comment-list>
+	</div>
 </div>
+
 <div *ngIf="!issue" class="container flex-align-center flex-justify-center" style="width:100%; height:50%">
 	<mat-spinner></mat-spinner>
 </div>

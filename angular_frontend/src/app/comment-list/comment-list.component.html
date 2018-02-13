@@ -1,3 +1,6 @@
-<p>
-  comment-list works!
-</p>
+<mat-list *ngIf="comments">
+	<div *ngFor="let comment of comments; index as i">
+		<app-comment [comment]="comment"></app-comment>
+		<mat-divider *ngIf="i + 1 !== comments.length"></mat-divider>
+	</div>
+</mat-list>

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpResponse } from '@angular/common/http';
 
 import { Observable } from 'rxjs/Observable';
 
@@ -35,17 +35,18 @@ export class IssueService {
 	createIssue(issue: Issue) {
 		let url = config.issuesUrl;
 		const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-		return this.http.post(url, JSON.stringify(issue), { headers: headers }).subscribe();
+		return this.http.post<Payload<Issue>>(url, JSON.stringify(issue), { headers: headers });
 	}
 
 	editIssue(issue: Issue) {
 		let url = config.specificIssueUrl(issue.id);
 		const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
-		return this.http.put(url, JSON.stringify(issue), { headers: headers });
+		return this.http.put<Payload<Issue>>(url, JSON.stringify(issue), { headers: headers, observe: 'response' });
 	}
 
-	getComments(issue: Issue, page: number, limit: number) {
-
+	getComments(issue: Issue, page: number, limit: number): Observable<Array<Comment>> {
+		let url = config.commentUrl(issue.id);
+		return this.http.get<Array<Comment>>(url);
 	}
 
 	addComment(issue: Issue, comment: Comment) {

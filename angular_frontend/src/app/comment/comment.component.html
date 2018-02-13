@@ -1,3 +1,6 @@
-<p>
-  comment works!
-</p>
+<mat-list-item>
+	<span matLine class="mat-subheading-1">{{ comment.user.email }}</span>
+	<div matLine><span class="mat-caption">{{ comment.date.replace("T", " ") }}</span></div>
+	<p matLine class="mat-subheading-1"></p>
+	<p matLine style="margin-top:16px">{{comment.comment}}</p>
+</mat-list-item>

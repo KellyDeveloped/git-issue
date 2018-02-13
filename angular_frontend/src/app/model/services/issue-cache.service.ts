@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-
+import { HttpErrorResponse } from '@angular/common/http';
 import { ReplaySubject } from 'rxjs/ReplaySubject';
 
 import { Issue } from '../issue/issue';
 import { GitUser } from '../issue/git-user';
 import { CacheEntry } from '../issue/cache-entry';
+import { Payload } from '../rest-responses/payload';
 import { IssueService } from '../rest-services/issue.service';
 
 @Injectable()
@@ -64,13 +65,55 @@ export class IssueCacheService {
 		}
 		else {
 			if (offset > this.countCache.entry) {
-				subject.next([])
+				subject.next([]);
 				return subject;
 			}
 			else {
 				return this.getPageFromServer(page, limit);
 			}
 		}
+	}
+
+	editIssue(issue: Issue): ReplaySubject<Payload<Issue>> {
+		const subject = new ReplaySubject<Payload<Issue>>(1);
+
+		this.issueService.editIssue(issue).subscribe((response) => {
+			let body: Payload<Issue>;
+
+			if (response.body !== null) {
+				body = response.body;
+			}
+			else {
+				throw Error(`The response to an edit request of ${issue.id} returned no body.
+							This goes against what I understand to be the contract.`);
+			}
+
+			if (response.status === 200) {
+				// Should never be -1 due to API contract.
+				let index = this.issues.findIndex(i => i.entry.id === body.payload.id);
+				this.issues[index] = new CacheEntry(body.payload);
+			}
+			else { // If not 200, then it's created a new issue
+				this.issues.push(new CacheEntry(body.payload));
+			}
+
+			subject.next(body);
+		}, subject.error);
+
+		return subject;
+	}
+
+	createIssue(issue: Issue): ReplaySubject<Payload<Issue>> {
+		const subject = new ReplaySubject<Payload<Issue>>(1);
+
+		this.issueService.createIssue(issue).subscribe((res) => {
+			this.issues.push(new CacheEntry<Issue>(res.payload));
+			subject.next(res);
+		}, err => {
+			subject.error(err);
+		});
+		
+		return subject;
 	}
 
 	private calculateOffset(page: number, limit: number) {
@@ -104,6 +147,8 @@ export class IssueCacheService {
 			}
 
 			this.sortIssues();
+		}, err => {
+			subject.error(err);
 		});
 
 		return subject;

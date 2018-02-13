@@ -1,26 +1,33 @@
 <div *ngIf="page" class="container flex-justify-center">
-	<mat-card style="width:1000px">
-		<mat-list>
-			<mat-list-item *ngFor="let issue of page; index as i" style="margin:16px 0">
-				<div matLine>
-					<div class="container flex-row flex-align-center">
-						<span class="mat-h2" style="margin:0">{{ issue?.id }}</span>
-						<span class="mat-body-1 " style="text-align:end; align-self:center">Status: {{ issue?.status }}</span>
-					</div>
-				</div>
-				<div matLine>
-					<span class="mat-body-1">{{ issue?.summary }}</span>
-				</div>
-				<div matLine style="margin-bottom: 16px">
-					<div class="container flex-row-reverse">
-						<a mat-button style="width:auto;" [routerLink]="issue.id">View</a>
-						<a mat-button style="width:auto;">Edit</a>
-					</div>
-				</div>
-				<mat-divider *ngIf="i + 1 !== page.length"></mat-divider>
-			</mat-list-item>
-		</mat-list>
-	</mat-card>
+	<div>
+		<mat-card style="width:1000px">
+			<div *ngIf="page.length > 0">
+				<mat-list>
+					<mat-list-item *ngFor="let issue of page; index as i" style="margin:16px 0">
+						<div matLine>
+							<div class="container flex-row flex-align-center">
+								<span class="mat-h2" style="margin:0">{{ issue?.id }}</span>
+								<span class="mat-body-1 " style="text-align:end; align-self:center">Status: {{ issue?.status }}</span>
+							</div>
+						</div>
+						<div matLine>
+							<span class="mat-body-1">{{ issue?.summary }}</span>
+						</div>
+						<div matLine style="margin-bottom: 16px">
+							<div class="container flex-row-reverse">
+								<a mat-button style="width:auto;" [routerLink]="issue.id">View</a>
+								<a mat-button style="width:auto;" [routerLink]="getEditLink(issue)">Edit</a>
+							</div>
+						</div>
+						<mat-divider *ngIf="i + 1 !== page.length"></mat-divider>
+					</mat-list-item>
+				</mat-list>
+			</div>
+			<div *ngIf="page.length == 0">
+				<h3>No issues to show</h3>
+			</div>
+		</mat-card>
+	</div>
 </div>
 <div *ngIf="!page" class="container flex-align-center flex-justify-center" style="width:100%; height:50%">
 	<mat-spinner></mat-spinner>

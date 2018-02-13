@@ -15,6 +15,7 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatListModule } from '@angular/material/list';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule } from '@angular/material/dialog';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 
 import { AppRoutingModule } from './app-routing.module';
@@ -29,10 +30,10 @@ import { EditIssueComponent } from './edit-issue/edit-issue.component';
 import { CreateCommentComponent } from './create-comment/create-comment.component';
 import { SingleIssueComponent } from './single-issue/single-issue.component';
 import { HeaderComponent } from './header/header.component';
-import { IssueListEntryComponent } from './issue-list-entry/issue-list-entry.component';
 
 import { IssueService } from './model/rest-services/issue.service';
 import { IssueCacheService } from './model/services/issue-cache.service';
+import { ErrorDialogueComponent } from './error-dialogue/error-dialogue.component';
 
 @NgModule({
 	declarations: [
@@ -46,7 +47,7 @@ import { IssueCacheService } from './model/services/issue-cache.service';
 		CreateCommentComponent,
 		SingleIssueComponent,
 		HeaderComponent,
-		IssueListEntryComponent
+		ErrorDialogueComponent
 	],
 	imports: [
 		BrowserModule,
@@ -66,12 +67,14 @@ import { IssueCacheService } from './model/services/issue-cache.service';
 		MatListModule,
 		MatDividerModule,
 		MatProgressSpinnerModule,
+		MatDialogModule,
 		BrowserAnimationsModule
 	],
 	providers: [
 		IssueService,
 		IssueCacheService
 	],
+	entryComponents: [ErrorDialogueComponent],
 	bootstrap: [AppComponent]
 })
 export class AppModule { }

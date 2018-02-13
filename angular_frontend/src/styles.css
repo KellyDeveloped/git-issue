@@ -12,6 +12,22 @@ body, html {
 	display: flex;
 }
 
+.container > * {
+	width: 100%;
+}
+
+.root-container {
+	width: 1000px;
+}
+
+.standard-margin {
+	margin: 16px;
+}
+
+.inner-margins > * {
+	margin: 16px;
+}
+
 .flex-column {
 	flex-direction: column
 }
@@ -36,8 +52,5 @@ body, html {
 	align-self: flex-end;
 }
 
-.container > * {
-	width: 100%;
-}
 
 

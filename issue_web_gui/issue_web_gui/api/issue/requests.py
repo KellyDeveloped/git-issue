@@ -80,7 +80,6 @@ class IssueAPI(Resource):
     @api.expect(issue_edit_fields)
     def put(self, id):
         edit_schema = IssueSchema(only=tuple(IssueSchema.edit_fields.keys()))
-        regular_schema = IssueSchema()
         parsed_data = edit_schema.load(request.get_json())
 
         if (len(parsed_data.errors.items()) > 0):
@@ -109,7 +108,9 @@ class IssueAPI(Resource):
             updated_issue.date = current_issue.date # Ensure date NEVER changes
             issue = handler.store_issue(updated_issue, "edit")
 
-        return regular_schema.dump(issue), HTTPStatus.OK
+        result = to_payload(GitUser(), issue, IssueSchema)
+
+        return result.data, HTTPStatus.OK
 
 
 @api.route('/issues/<string:id>/comments')

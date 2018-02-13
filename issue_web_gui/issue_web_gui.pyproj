@@ -22,6 +22,9 @@
   <PropertyGroup>
     <VisualStudioVersion Condition=" '$(VisualStudioVersion)' == '' ">10.0</VisualStudioVersion>
   </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Start' ">
+    <OutputPath>bin\Start\</OutputPath>
+  </PropertyGroup>
   <ItemGroup>
     <Content Include="issue_web_gui\static\content\bootstrap.css" />
     <Content Include="issue_web_gui\static\content\bootstrap.min.css" />
