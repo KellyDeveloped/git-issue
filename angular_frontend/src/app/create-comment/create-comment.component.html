@@ -1,4 +1,4 @@
 <mat-card class="container flex-column">
-	<mat-form-field><textarea matInput placeholder="Add a comment" rows="5"></textarea></mat-form-field>
-	<div class="flex-item-right"><button mat-button>Add Comment</button></div>
+	<mat-form-field><textarea matInput placeholder="Add a comment" rows="5" [(ngModel)]="comment"></textarea></mat-form-field>
+	<div class="flex-item-right"><button mat-button (click)="submit()">Add Comment</button></div>
 </mat-card>

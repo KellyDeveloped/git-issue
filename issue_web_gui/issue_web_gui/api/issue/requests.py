@@ -152,7 +152,7 @@ class CommentListAPI(Resource):
         schema = CommentSchema()
         result = schema.dump(comment)
 
-        return result.data
+        return result.data, HTTPStatus.CREATED
 
 
 @api.route('/status-indicators')

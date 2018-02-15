@@ -14,7 +14,7 @@ export class CommentListComponent implements OnInit {
 	@Input() issue: Issue;
 	comments: Array<Comment>;
 
-	constructor(private issueService: IssueService) { this.comments = [] }
+	constructor(private issueService: IssueService) { }
 
 	ngOnInit() {
 		this.issueService.getComments(this.issue, 1, 10).subscribe(res => { this.comments = res; });

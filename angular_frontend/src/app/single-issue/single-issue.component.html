@@ -1,7 +1,7 @@
 <div class="container flex-justify-center">
 	<div *ngIf="issue" class="root-container container inner-margins flex-column flex-justify-center">
 		<app-issue [issue]="issue"></app-issue>
-		<div style="width:1000px"><app-create-comment></app-create-comment></div>
+		<app-create-comment [issue]="issue"></app-create-comment>
 		<app-comment-list [issue]="issue"></app-comment-list>
 	</div>
 </div>

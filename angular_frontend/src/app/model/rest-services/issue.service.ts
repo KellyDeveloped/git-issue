@@ -50,7 +50,9 @@ export class IssueService {
 	}
 
 	addComment(issue: Issue, comment: Comment) {
-
+		let url = config.commentUrl(issue.id);
+		const headers = new HttpHeaders({ 'Content-Type': 'application/json' });
+		return this.http.post<Comment>(url, JSON.stringify(comment), { headers: headers });
 	}
 
 }

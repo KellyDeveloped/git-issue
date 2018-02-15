@@ -3,24 +3,24 @@ from pathlib import Path
 from comment.comment import Comment
 from utils.json_utils import JsonConvert
 from git_manager import GitManager
-
+from issue import Issue
+import issue_handler
 
 class CommentHandler(object):
     """description of class"""
 
-    def __init__(self, issue_path: Path, issue_id):
-        print(issue_path)
+    def __init__(self, issue_path, issue_id):
         if issue_path == None:
             raise AttributeError("Cannot create a comment handler without an issue path.")
         # elif not issue_path.exists():
         #     raise AttributeError("Cannot create a comment handler for an issue that doesn't exist.")
 
-        self.folder_path = self._generate_folder_path(issue_path)
+        self.folder_path = self._generate_folder_path(issue_id)
         self.index = index.Index.obtain_index(issue_path)
         self.issue_id = issue_id
 
-    def _generate_folder_path(self, issue_path: Path):
-        return issue_path.joinpath("comments")
+    def _generate_folder_path(self, issue_id):
+        return Path(f"{issue_id}/comments")
 
     def generate_comment_path(self, comment_id):
         return self.folder_path.joinpath(f"{str(comment_id)[:6]}.json")
