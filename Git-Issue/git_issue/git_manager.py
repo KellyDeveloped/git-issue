@@ -51,7 +51,7 @@ class GitManager(object):
 
     def set_up_branch(self):
         self.load_issue_branch()
-        self.pull()
+        #self.pull()
 
     def _create_new_issue_branch(self, repo):
         if repo.is_dirty():
@@ -235,8 +235,8 @@ class GitManager(object):
 
         self.unload_issue_branch()
 
-        if should_push:
-            self.push()
+        #if should_push:
+        #    self.push()
 
         return result
 

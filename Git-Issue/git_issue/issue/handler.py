@@ -1,7 +1,7 @@
 from pathlib import Path
 from git_manager import GitManager
 from utils.json_utils import JsonConvert
-from tracker import Tracker
+from issue.tracker import Tracker
 from comment.handler import CommentHandler
 
 
@@ -73,9 +73,12 @@ def store_issue(issue, cmd, generate_id=False):
     def action():
         if (generate_id):
             issue.id = generate_issue_id()
+            _increment_issue_count()
 
         JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
-        _increment_issue_count()
+        tracker = Tracker.obtain_tracker()
+        tracker.track_or_update_uuid(issue.uuid, issue.id)
+        tracker.store_tracker()
         return issue
 
     gm = GitManager()

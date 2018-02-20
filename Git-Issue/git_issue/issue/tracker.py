@@ -3,16 +3,40 @@ from utils.json_utils import JsonConvert
 from git_manager import GitManager
 
 @JsonConvert.register
+class UUIDTrack(object):
+
+    def __init__(self, uuid=None, issue=None):
+        self.uuid = uuid
+        self.issue = issue
+
+
+@JsonConvert.register
 class Tracker(object):
     """All non-user tracked settings (i.e program-defined variables) are contained here."""
 
     ISSUE_IDENTIFIER = "ISSUE"
 
-    def __init__(self, issue_count=0):
+    def __init__(self, issue_count=0, tracked_uuids=[]):
         self.issue_count = issue_count
-        
+        self.tracked_uuids = tracked_uuids
+
     def increment_issue_count(self):
         self.issue_count += 1
+
+    def track_or_update_uuid(self, uuid, issue):
+        for tracked in self.tracked_uuids:
+            if tracked.uuid == uuid:
+                tracked.issue = issue
+                return
+        
+        self.tracked_uuids.append(UUIDTrack(uuid, issue))
+
+    def get_issue_from_uuid(self, uuid):
+        for tracked in self.tracked_uuids:
+            if tracked.uuid == uuid:
+                return tracked.issue
+
+        return None
 
     def store_tracker(self):
         JsonConvert.ToFile(self, Tracker.get_path())
@@ -34,3 +58,4 @@ class Tracker(object):
             tracker = Tracker()
 
         return tracker
+

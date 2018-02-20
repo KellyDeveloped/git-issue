@@ -3,8 +3,7 @@ from pathlib import Path
 from comment.comment import Comment
 from utils.json_utils import JsonConvert
 from git_manager import GitManager
-from issue import Issue
-import issue_handler
+from issue.issue import Issue
 
 class CommentHandler(object):
     """description of class"""

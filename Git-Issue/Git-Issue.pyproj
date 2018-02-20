@@ -39,10 +39,19 @@
     <Compile Include="git_issue\gitissue.py" />
     <Compile Include="git_issue\gituser.py" />
     <Compile Include="git_issue\git_manager.py" />
-    <Compile Include="git_issue\issue.py" />
-    <Compile Include="git_issue\issue_handler.py" />
+    <Compile Include="git_issue\git_utils\merge_utils.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="git_issue\git_utils\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="git_issue\issue\issue.py" />
+    <Compile Include="git_issue\issue\__init__.py">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="git_issue\issue\handler.py" />
     <Compile Include="git_issue\utils\json_utils.py" />
-    <Compile Include="git_issue\tracker.py" />
+    <Compile Include="git_issue\issue\tracker.py" />
     <Compile Include="git_issue\utils\date_utils.py">
       <SubType>Code</SubType>
     </Compile>
@@ -60,6 +69,8 @@
   <ItemGroup>
     <Folder Include="git_issue\" />
     <Folder Include="git_issue\comment\" />
+    <Folder Include="git_issue\git_utils\" />
+    <Folder Include="git_issue\issue\" />
     <Folder Include="git_issue\utils\" />
     <Folder Include="tests\" />
   </ItemGroup>

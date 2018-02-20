@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 import argparse
-import issue_handler as issue_handler
-from issue import Issue
+import issue.handler as issue_handler
+from issue.issue import Issue
 from gituser import GitUser
 from comment.comment import Comment
 
@@ -28,17 +28,17 @@ listParser = subparser.add_parser('list', help='List known issues.')
 subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
 unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
 
-def confirm_operation(cmd, issue):
+def confirm_operation(issue, operation):
     print("Operation will result in the following issue:\n")
     issue_handler.display_issue(issue)
-    create = input(f"\nConfirm {cmd} (Y/N): ").capitalize()
+    create = input(f"\nConfirm (Y/N): ").capitalize()
     
     while create != "Y" and create != "YES" and create != "N" and create != "NO":
         create = input("\nInvalid input, please try again (Y/N): ").capitalize()
 
     if create == "Y" or create == "YES":
-        issue_handler.store_issue(issue, cmd)
-        print(f"{issue.id} created successfully.")
+        operation()
+        print(f"Operation successful.")
 
     else:
         print("Operation cancelled.")
@@ -46,14 +46,17 @@ def confirm_operation(cmd, issue):
 # Default methods for sub-parsers. These methods will be called when the keyword for the sub-parser is given.
 def create(args):
     issue = Issue()
-    issue.id = issue_handler.generate_issue_id()
     issue.summary = args.summary
     issue.description = args.description
     issue.assignee = GitUser(email=args.assignee) if args.assignee != None else None
     issue.reporter = GitUser(email=args.reporter)
     issue.subscribers.append(GitUser())
 
-    confirm_operation("creation", issue)
+    def operation():
+        new_issue = issue_handler.store_issue(issue, "creation", True)
+        print(f"ID of newly created issue: {new_issue.id}")
+
+    confirm_operation(issue, operation)
 
 def edit(args):
     if (not issue_handler.does_issue_exist(args.issue)):
@@ -75,7 +78,7 @@ def edit(args):
     issue.status = args.status if args.status != None else issue.status
 
     print()
-    confirm_operation("edit", issue)
+    confirm_operation(issue, lambda: issue_handler.store_issue(issue, "edit"))
 
 def comment(args):
     comment = Comment(args.comment)
