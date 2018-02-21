@@ -5,6 +5,29 @@ from issue.tracker import Tracker
 from comment.handler import CommentHandler
 
 
+class IssueHandler(object):
+    
+    def __init__(self):
+        self.tracker = Tracker.obtain_tracker()
+
+    def store_issue(self, issue, cmd, generate_id=False):
+        gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
+    
+        def action():
+            if (generate_id):
+                issue.id = generate_issue_id()
+                self.tracker.increment_issue_count()
+
+            JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
+            self.tracker.track_or_update_uuid(issue.uuid, issue.id)
+            self.tracker.store_tracker()
+
+            return issue
+
+        gm = GitManager()
+        return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)
+
+
 def _increment_issue_count():
     tracker = Tracker.obtain_tracker()
     tracker.increment_issue_count()

@@ -57,14 +57,26 @@ class Index(object):
         gm = GitManager()
         gm.add_to_index([str(self._path_to_index)])
 
+    def set_index_path(self, path: Path):
+        self._path_to_index = self._generate_index_path(path)
+
     @classmethod
     def _generate_index_path(cls, issue_path: Path) -> Path:
-        return issue_path.joinpath("index.json")
+        if not Path.match("*issue.json"):
+            return issue_path.joinpath("index.json")
+
+        return issue_path
 
     @classmethod
     def obtain_index(cls, path):
-        cls._path_to_index = cls._generate_index_path(path)
-        return JsonConvert.FromFile(cls._path_to_index) if cls._path_to_index.exists() else Index()
+        index_path = cls._generate_index_path(path)
+        
+        if (index_path.exists):
+            return JsonConvert.FromFile(index_path)
+        else:
+            index = Index()
+            index._path_to_index = index_path
+            return index
 
 
 class IndexEntryInvalidError(Exception):
