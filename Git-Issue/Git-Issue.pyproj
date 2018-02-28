@@ -65,6 +65,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="tests\test_issue_handler.py" />
+    <Compile Include="tests\test_merge_utils.py">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="git_issue\" />

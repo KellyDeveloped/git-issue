@@ -47,4 +47,12 @@ class GitUser(object):
                 return GitUser(temp[0], email)
 
         return None
-            
+
+    def __eq__(self, o: object) -> bool:
+        if type(o) is not GitUser:
+            return False
+
+        o: GitUser = o
+
+        return self.email == o.email
+

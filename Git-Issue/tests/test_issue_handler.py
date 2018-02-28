@@ -1,13 +1,13 @@
 import sys
 from pathlib import Path
-from unittest.mock import MagicMock
+
 sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
 import pytest
 import inspect
-import issue_handler as handler
+import issue.handler as handler
 from git_manager import GitManager
-from tracker import Tracker
-from issue import Issue
+from issue.tracker import Tracker
+from issue.issue import Issue
 from utils.json_utils import JsonConvert
 
 @pytest.fixture
@@ -16,6 +16,7 @@ def tracker(monkeypatch):
 
         def __init__(self, issue_count=0):
             self.issue_count = 10
+            self.tracked_uuids = []
 
         def store_tracker(self):
             pass
@@ -25,7 +26,7 @@ def tracker(monkeypatch):
             return MockTracker()
 
     mt = MockTracker()
-    monkeypatch.setattr("tracker.Tracker.obtain_tracker", lambda: mt)
+    monkeypatch.setattr("issue.tracker.Tracker.obtain_tracker", lambda: mt)
     return mt
 
 @pytest.fixture

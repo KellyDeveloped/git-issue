@@ -41,6 +41,7 @@ class JsonConvert(object):
         if not path.parent.exists():
             clsself._create_dir(path.parent)
 
+
         with open(path, 'w') as jfile:
             jfile.writelines([clsself.ToJSON(obj)])
         return path

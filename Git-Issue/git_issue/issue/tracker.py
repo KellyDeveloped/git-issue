@@ -9,6 +9,15 @@ class UUIDTrack(object):
         self.uuid = uuid
         self.issue = issue
 
+    def __eq__(self, value):
+        if type(value) is UUIDTrack:
+            return self.uuid == value.uuid and self.issue == value.issue
+
+        return False
+
+    def __hash__(self):
+        return self.issue.__hash__() + self.uuid.__hash__()
+
 
 @JsonConvert.register
 class Tracker(object):
@@ -16,7 +25,7 @@ class Tracker(object):
 
     ISSUE_IDENTIFIER = "ISSUE"
 
-    def __init__(self, issue_count=0, tracked_uuids=[]):
+    def __init__(self, issue_count=0, tracked_uuids:[UUIDTrack]=[]):
         self.issue_count = issue_count
         self.tracked_uuids = tracked_uuids
 

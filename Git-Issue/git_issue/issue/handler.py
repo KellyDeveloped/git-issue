@@ -1,5 +1,6 @@
 from pathlib import Path
 from git_manager import GitManager
+from issue.issue import Issue
 from utils.json_utils import JsonConvert
 from issue.tracker import Tracker
 from comment.handler import CommentHandler
@@ -7,25 +8,90 @@ from comment.handler import CommentHandler
 
 class IssueHandler(object):
     
-    def __init__(self):
-        self.tracker = Tracker.obtain_tracker()
+    def __init__(self, tracker=Tracker.obtain_tracker()):
+        self.tracker = tracker
+
+    def generate_issue_id(self, count: int = None):
+        num = self.tracker.issue_count + 1 if count is None else count
+        return "{}-{}".format(self.tracker.ISSUE_IDENTIFIER, num)
+
+    def next_issue_id(self, issue: Issue) -> str:
+        num = int(issue.id.replace(f"{self.tracker.ISSUE_IDENTIFIER}-", "")) + 1
+        return self.generate_issue_id(num)
+
+    @staticmethod
+    def _generate_issue_folder_path(id):
+        dir = Path.cwd()
+
+        if dir.parts[-1] != "issue":
+            dir = dir.joinpath("issue")
+
+        return dir.joinpath(id)
+
+    def _generate_issue_file_path(self, id):
+        return Path.cwd().joinpath(f"{self._generate_issue_folder_path(id)}/issue.json")
+
+    def get_issue_path(self, issue: Issue):
+        return _generate_issue_file_path(issue.id)
 
     def store_issue(self, issue, cmd, generate_id=False):
-        gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
+        def gen_paths():
+            return [str(_generate_issue_file_path(issue.id))]
     
         def action():
-            if (generate_id):
-                issue.id = generate_issue_id()
+            if generate_id:
+                issue.id = self.generate_issue_id()
                 self.tracker.increment_issue_count()
 
             JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
             self.tracker.track_or_update_uuid(issue.uuid, issue.id)
-            self.tracker.store_tracker()
 
             return issue
 
         gm = GitManager()
         return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)
+
+    def get_issue_from_uuid(self, uuid):
+        id = self.tracker.get_issue_from_uuid(uuid)
+        return self.get_issue_from_issue_id(id)
+
+    def get_issue_from_issue_id(self, id):
+        gm = GitManager()
+        try:    
+            return gm.perform_git_workflow(lambda: JsonConvert.FromFile(_generate_issue_file_path(id)))
+        except IOError:
+            return None
+
+    def display_issue(issue, with_comments=False):
+        print (f"Issue ID:\t{issue.id}")
+        print (f"Summary:\t{issue.summary}")
+        print (f"Description:\t{issue.description}")
+    
+        if with_comments:
+            print ("Comments:")
+            for c in get_comments:
+                print (f"\tUser: {c.user}\tTimestamp:{c.date}")
+                print (f'\t"{c.comment}"')
+
+        print (f"Status:\t\t{issue.status}")
+    
+        if issue.assignee != None:
+            print (f"Assignee:\t{issue.assignee.user}, {issue.assignee.email}")
+        else:
+            print ("Assignee:\tUnassigned")
+
+        if issue.reporter != None:
+            print (f"Reporter:\t{issue.reporter.user}, {issue.reporter.email}")
+        else:
+            print ("Reporter:\tUnassigned")
+
+        print ("Subscribers:")
+        for s in issue.subscribers:
+            print (f"\t{s.user}, {s.email}")
+
+    def does_issue_exist(self, id: str):
+        gm = GitManager()
+        return gm.perform_git_workflow(lambda: _generate_issue_file_path(id).exists())
 
 
 def _increment_issue_count():
@@ -102,7 +168,7 @@ def store_issue(issue, cmd, generate_id=False):
         tracker = Tracker.obtain_tracker()
         tracker.track_or_update_uuid(issue.uuid, issue.id)
         tracker.store_tracker()
-        return issue
+        return issue,
 
     gm = GitManager()
     return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)

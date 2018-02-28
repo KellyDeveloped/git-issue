@@ -4,6 +4,9 @@ import shutil
 from pathlib import Path
 from typing import Callable
 
+from git import GitCommandError
+
+
 class GitManager(object):
     """ This class behaves as an interface between the front of the program and GIT.
         This is an attempt to keep most of the GIT interfacing in one manageable place.
@@ -65,12 +68,23 @@ class GitManager(object):
 
         curr_branch = repo.head.ref
         repo.git.checkout("--orphan", self.ISSUE_BRANCH)
-        repo.git.rm("-rf", "--cached", ".")
+
+        if repo.git.ls_files():
+            repo.git.rm("-rf", "--cached", ".")
 
         self.commit("created_issue_branch", new_branch=True)
-        repo.git.push("-u", "origin", self.ISSUE_BRANCH)
 
-        curr_branch.checkout(force=True)
+        try:
+            repo.git.push("-u", "origin", self.ISSUE_BRANCH)
+        except GitCommandError as e:
+            print("Error occurred when pushing new branch to origin:")
+            print(f"\t{e.stderr}")
+
+        print("Attempting to switch back to old branch...")
+        try:
+            curr_branch.checkout(force=True)
+        except GitCommandError as e:
+            print("Unable to change back to old branch")
 
         
     def load_issue_branch(self):
@@ -84,10 +98,15 @@ class GitManager(object):
                 os.chdir(path)
             return
 
-        has_remote = len(repo.refs) > 0 and hasattr(repo.remote().refs, self.ISSUE_BRANCH)
+
+        has_remote = len(repo.remotes) > 0 and hasattr(repo.remote().refs, self.ISSUE_BRANCH)
         has_local_branch = hasattr(repo.refs, self.ISSUE_BRANCH)
         if not has_local_branch and not has_remote:
             self._create_new_issue_branch(repo)
+
+        # If current branch is the issue branch, we can just go from there
+        if repo.active_branch.name == self.ISSUE_BRANCH:
+            return
 
         worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
 
