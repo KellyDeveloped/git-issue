@@ -1,0 +1,24 @@
+{
+    "id": "ISSUE-10",
+    "uuid": 198452294597960979927396502352764409511,
+    "date": "2018-03-04T17:02:01.928973",
+    "summary": "Angular UI not showing new lines when it should be.",
+    "description": "The \\n's are there in code, but they're not being translated into <br> tags. It's 2018, why do I still need to manually parse these lines???\n\nSee https://stackoverflow.com/questions/35999185/angular2-pipes-output-raw-html for a CSS solution",
+    "status": "open",
+    "assignee": null,
+    "reporter": {
+        "user": "Liam Cairns Kelly",
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        },
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
+    "attachments": []
+}
