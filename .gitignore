@@ -35,3 +35,4 @@ __pycache__/
 # Ubuntu/Pycharm
 venv/
 .idea/
+/Git-Issue/.pytest_cache/v/cache

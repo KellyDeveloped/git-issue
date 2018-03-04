@@ -168,7 +168,7 @@ def store_issue(issue, cmd, generate_id=False):
         tracker = Tracker.obtain_tracker()
         tracker.track_or_update_uuid(issue.uuid, issue.id)
         tracker.store_tracker()
-        return issue,
+        return issue
 
     gm = GitManager()
     return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)

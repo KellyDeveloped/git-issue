@@ -6,7 +6,7 @@
     <ProjectGuid>{c9172f02-8bc7-4565-88dc-d37112cb9725}</ProjectGuid>
     <ProjectHome>..\issue_web_gui\</ProjectHome>
     <StartupFile>runserver.py</StartupFile>
-    <SearchPath>..\Git-Issue\git_issue\</SearchPath>
+    <SearchPath>..\Git-Issue\git_issue\;..\Git-Issue</SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <ProjectTypeGuids>{789894c7-04a9-4a11-a6b5-3f4435165112};{1b580a1a-fdb3-4b32-83e1-6407eb2722e6};{349c5851-65df-11da-9384-00065b846f21};{888888a0-9f3d-457c-b088-3a5042f75d52}</ProjectTypeGuids>
@@ -16,6 +16,7 @@
     <PythonWsgiHandler>{StartupModule}.wsgi_app</PythonWsgiHandler>
     <UseIISExpress>true</UseIISExpress>
     <PythonRunWebServerCommandEnvironment>FLASK_DEBUG=1</PythonRunWebServerCommandEnvironment>
+    <PythonDebugWebServerCommandEnvironment>FLASK_DEBUG=0</PythonDebugWebServerCommandEnvironment>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'" />
   <PropertyGroup Condition="'$(Configuration)' == 'Release'" />

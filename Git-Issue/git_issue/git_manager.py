@@ -94,7 +94,7 @@ class GitManager(object):
         path = os.path.normpath(issue_path)
 
         if (self._is_issue_branch_loaded(repo)):
-            if (Path.cwd() != path):
+            if (Path.cwd().parts[-1] != self.ISSUE_BRANCH):
                 os.chdir(path)
             return
 

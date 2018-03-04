@@ -15,12 +15,10 @@ import hashlib
 
 from .schemas import IssueSchema, issue_create_fields, issue_edit_fields, GitUserSchema, CommentSchema, comment_fields, to_payload, IssueListSchema
 
-import issue_handler as handler
+import issue.handler as handler
 from issue import Issue, status_indicators
 from comment import Comment
 from gituser import GitUser
-from datetime import datetime
-
 
 page_args = {
     'page': fields.Integer(),
@@ -30,8 +28,8 @@ page_args = {
 
 class IssueList(object):
     def __init__(self, count: int, issues: Issue):
-        self.count = count;
-        self.issues = issues;
+        self.count = count
+        self.issues = issues
 
 @api.route('/issues')
 class IssueListAPI(Resource):
@@ -42,7 +40,7 @@ class IssueListAPI(Resource):
         limit = args.get("limit", 10)
 
         issues, count = handler.get_issue_range(page, limit)
-        response = IssueList(count, issues);
+        response = IssueList(count, issues)
 
         result = to_payload(GitUser(), response, IssueListSchema)
         return result.data
@@ -62,9 +60,9 @@ class IssueListAPI(Resource):
             issue.subscribers.append(issue.assignee)
         
         created_issue = handler.store_issue(issue, "create", generate_id=True)
-        result = to_payload(GitUser(), issues, IssueSchema)
+        result = to_payload(GitUser(), issue, IssueSchema)
 
-        return result.data, 201, {'location': f'issues/${create_issue.id}'}
+        return result.data, 201, {'location': f'issues/${created_issue.id}'}
 
 
 @api.route('/issues/<string:id>')

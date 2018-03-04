@@ -2,7 +2,7 @@
 Routes and views for the flask application.
 """
 
-import issue_handler as handler
+import issue.handler as handler
 from issue import Issue
 from gituser import GitUser
 from datetime import datetime
