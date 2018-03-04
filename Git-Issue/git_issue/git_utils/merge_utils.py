@@ -1,4 +1,5 @@
-import git
+from copy import deepcopy
+
 from enum import Enum
 from abc import ABC, abstractmethod
 
@@ -94,8 +95,7 @@ class CommentIndexResolutionTool(ResolutionTool):
         self.path = path
 
     def resolve(self):
-        self.index.set_index_path(self.path)
-        self.index.store_index()
+        self.index.store_index(self.path)
 
 
 class ConflictResolver(ABC):
@@ -189,6 +189,7 @@ class CommentIndexConflictResolver(ConflictResolver):
 
         return CommentIndexResolutionTool(index, self.path)
 
+
 class DivergenceConflictResolver(ConflictResolver):
 
     def __init__(self):
@@ -196,9 +197,33 @@ class DivergenceConflictResolver(ConflictResolver):
         self.resolved_conflicts: [Issue] = []
         self.resolved_tracker: Tracker = None
 
-    def _get_edit_resolution(self, diverged, current):
-        print(f"Issue with ID {diverged.id} and UUID {diverged.uuid} is conflicting with issue {current.id}")
-        print("The following are the conflicts between the ")
+    def _get_edit_resolution(self, diverged: Issue, current: Issue):
+        print(f"Issue with ID {diverged.id} and UUID {diverged.uuid} has been changed to {current.id} in a previous "
+              f"merge conflict resolution.")
+
+        print("Please examine the two issues and give a resolution to the conflicts when prompted")
+
+        diverged.display()
+        current.display()
+        updated_issue = deepcopy(current)
+
+        fields = self._get_edited_fields(diverged, current)
+        for field, div, curr in fields:
+            edit = input(f"Resolution for {field}:")
+            setattr(updated_issue, field, edit)
+
+
+    def _get_edited_fields(self, diverged, current):
+        diff = []
+
+        for d in diverged.__dict__:
+            div_attr = getattr(diverged, d)
+            cur_attr = getattr(current, d)
+
+            if div_attr != cur_attr:
+                diff.append((d, div_attr, cur_attr))
+
+        return diff
 
     def generate_resolution(self):
         matching_issues: (Issue, Issue) = []
@@ -208,12 +233,12 @@ class DivergenceConflictResolver(ConflictResolver):
             found = False
             diverged_index = 0
 
-            for diverged in diverged_issues, i in range(0, len(diverged_issues)):
+            for diverged in diverged_issues:
                 if diverged.uuid == resolved.uuid:
                     found = True
-                    diverged_index = i
-                    matching_issues.append(diverged, resolved)
+                    matching_issues.append((diverged, resolved))
                     break
+                diverged_index += 1
 
             if found: # Remove the found issue from the list so we don't need to examine it again
                 del diverged_issues[diverged_index]
@@ -227,6 +252,7 @@ class DivergenceConflictResolver(ConflictResolver):
 
         for diverged, match in matching_issues:
             self._get_edit_resolution(diverged, match)
+
 
 class GitMerge(object):
     """ A class designed to """
@@ -258,7 +284,7 @@ class GitMerge(object):
 
         return unmerged
 
-    def produce_create_resolver(self, conflicts: [ConflictInfo] = None) -> CreateConflictResolver:
+    def produce_create_resolver(self, conflicts: [ConflictInfo] = None) -> ConflictResolver:
         resolver = CreateConflictResolver()
         resolver.conflicts = self._get_conflicts_of_type(ConflictType.CREATE, conflicts)
 
@@ -268,10 +294,30 @@ class GitMerge(object):
         resolver.tracker = Tracker(len(uuids), uuids)
         return resolver
 
-    def produce_comment_index_resolver(self, path: Path, conflicts: [ConflictInfo] = None):
+    def produce_comment_index_resolver(self, path: Path, conflicts: [ConflictInfo] = None) -> ConflictResolver:
         resolver = CommentIndexConflictResolver()
         resolver.conflicts = self._get_conflicts_of_type(ConflictType.COMMENT_INDEX, conflicts)
         resolver.path = path
+        return resolver
+
+    def produce_create_edit_divergence_resolver(self, conflicts: [ConflictInfo],
+                                                resolved_issues: [Issue],
+                                                resolved_tracker: Tracker) -> ConflictResolver:
+        diverged_conflicts = self._get_conflicts_of_type(ConflictType.CREATE_EDIT_DIVERGENCE, conflicts)
+        diverged_issues = []
+
+        for info in diverged_conflicts:
+            # Head should always equal common ancestor, but in the event it's ever the merge head that equals
+            # the common ancestor and not the head then we need to work from that instead. Branch should never
+            # be hit, but is there as a safety precaution
+            diverged = info.conflicts[2] if info.conflicts[0] == info.conflicts[1] else info.conflicts[1]
+            diverged_issues.append(diverged)
+
+        resolver = DivergenceConflictResolver()
+        resolver.diverged_issues = diverged_issues
+        resolver.resolved_conflicts = resolved_issues
+        resolver.resolved_tracker = resolved_tracker
+
         return resolver
 
     def begin_conflict_resolution(self) -> [ConflictInfo]:

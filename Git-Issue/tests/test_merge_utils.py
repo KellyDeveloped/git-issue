@@ -5,8 +5,9 @@ import os
 
 from comment.index import Index, IndexEntry
 from git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
-    CommentIndexConflictResolver
+    CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver
 from issue.tracker import UUIDTrack, Tracker
+from utils.json_utils import JsonConvert
 
 sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
 
@@ -54,6 +55,10 @@ def issue_3():
     issue.summary = "summary-of-issue-3"
     return issue
 
+def issue_2_with_id_3(issue_2, issue_3):
+    issue_2.id = issue_3.id
+    return issue_2
+
 @pytest.fixture
 def original_index_entry():
     return Index([IndexEntry("594832.json", "2018-02-25T22:33:56.04040"),
@@ -61,8 +66,15 @@ def original_index_entry():
 
 @pytest.fixture
 def conflicting_index_entry():
-    return Index([IndexEntry("345234.json", "2018-02-25T22:33:56.97968"),
-           IndexEntry("239171.json", "2018-02-25T22:33:58.00000")])
+    return Index([IndexEntry("239171.json", "2018-02-25T22:50:02.00111"),
+                  IndexEntry("345234.json", "2018-02-25T22:33:56.97968")])
+
+@pytest.fixture
+def sorted_comment_index():
+    return Index([IndexEntry("594832.json", "2018-02-25T22:33:56.04040"),
+                  IndexEntry("345234.json", "2018-02-25T22:33:56.97968"),
+                  IndexEntry("894754.json", "2018-02-25T22:33:58.00000"),
+                  IndexEntry("239171.json", "2018-02-25T22:50:02.00111")])
 
 @pytest.fixture
 def comment_index_conflict(original_index_entry, conflicting_index_entry):
@@ -158,14 +170,58 @@ def test_produce_comment_index_resolver(comment_index_conflict, first_repo):
     resolver = merger.produce_comment_index_resolver(comment_index_conflict.path, [comment_index_conflict])
     assert [comment_index_conflict] == resolver.conflicts and comment_index_conflict.path == resolver.path
 
-def test_comment_index_resolver(comment_index_conflict, original_index_entry, conflicting_index_entry):
+def test_comment_index_resolver(comment_index_conflict, sorted_comment_index):
     resolver = CommentIndexConflictResolver()
     resolver.conflicts = [conflict for conflict in comment_index_conflict.conflicts]
     resolver.path = "fake_path"
 
-    expected_entries = original_index_entry.entries + conflicting_index_entry.entries
-    expected_entries.sort(key=lambda x: x.date)
-
     result = resolver.generate_resolution()
-    assert expected_entries == result.index.entries
+    assert sorted_comment_index == result.index
+
+def test_comment_index_resolution(sorted_comment_index, first_repo):
+    os.chdir(first_repo.working_dir)
+
+    path = Path("ISSUE-1/index.json")
+    resolution = CommentIndexResolutionTool(sorted_comment_index, path)
+    resolution.resolve()
+
+    index = Index.obtain_index(path)
+    assert index == sorted_comment_index
+
+def test_produce_divergence_resolver(issue_1, issue_2, issue_3, first_repo):
+    resolved_issues = [issue_1, issue_2, issue_3]
+    resolved_tracker = Tracker()
+
+    for issue in resolved_issues:
+        resolved_tracker.track_or_update_uuid(issue.uuid, issue.id)
+
+    issue_2_json = JsonConvert.ToJSON(issue_2)
+    issue_2_copy = JsonConvert.FromJSON(issue_2_json)
+    issue_2_copy.uuid = 53368803138698180295652887974160049016
+
+    conflict = ConflictInfo(IssueHandler().get_issue_path(issue_2), [issue_2, issue_2, issue_2_copy])
+
+    merger = GitMerge(first_repo)
+    resolver = merger.produce_create_edit_divergence_resolver([conflict], resolved_issues, resolved_tracker)
+    assert resolver.resolved_conflicts == resolved_issues and resolver.resolved_tracker == resolved_tracker
+    assert resolver.diverged_issues == [issue_2_copy]
+
+def test_divergence_resolver(issue_1, issue_2, issue_3, monkeypatch):
+    resolved_issues = [issue_1, issue_2, issue_3]
+    resolved_tracker = Tracker()
+
+    for issue in resolved_issues:
+        resolved_tracker.track_or_update_uuid(issue.uuid, issue.id)
+
+    issue_2_json = JsonConvert.ToJSON(issue_2)
+    issue_2_copy = JsonConvert.FromJSON(issue_2_json)
+    issue_2_copy.uuid = 53368803138698180295652887974160049016
+    issue_2_copy.summary = "This is actually issue 3"
+
+    resolver = DivergenceConflictResolver()
+    resolver.resolved_tracker = resolved_tracker
+    resolver.resolved_conflicts = resolved_issues
+    resolver.diverged_issues = [issue_2_copy]
+
+    resolution = resolver.generate_resolution()
 

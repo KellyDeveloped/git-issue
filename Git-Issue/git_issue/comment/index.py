@@ -11,6 +11,15 @@ class IndexEntry(object):
         self.path = path
         self.date = date
 
+    def __eq__(self, other):
+        if type(other) is not IndexEntry:
+            return False
+
+        return self.path == other.path and self.date == other.date
+
+    def __hash__(self):
+        return self.path.__hash__() + self.date.__hash__() * 23
+
 
 @JsonConvert.register
 class Index(object):
@@ -52,17 +61,15 @@ class Index(object):
 
             pos = pos + offset
 
-    def store_index(self):
-        JsonConvert.ToFile(self, self._path_to_index)
+    def store_index(self, path=None):
+        loc = path if path is not None else self._path_to_index
+        JsonConvert.ToFile(self, loc)
         gm = GitManager()
-        gm.add_to_index([str(self._path_to_index)])
-
-    def set_index_path(self, path: Path):
-        self._path_to_index = self._generate_index_path(path)
+        gm.add_to_index([str(loc)])
 
     @classmethod
     def _generate_index_path(cls, issue_path: Path) -> Path:
-        if not Path.match("*issue.json"):
+        if not issue_path.match("*index.json"):
             return issue_path.joinpath("index.json")
 
         return issue_path
@@ -78,6 +85,16 @@ class Index(object):
             index._path_to_index = index_path
             return index
 
+    def __eq__(self, object: object) -> bool:
+        if type(object) is not Index:
+            return False
+
+        object: Index = object
+
+        return self.entries == object.entries
+
+    def __hash__(self):
+        return self.entries.__hash__()
 
 class IndexEntryInvalidError(Exception):
     pass

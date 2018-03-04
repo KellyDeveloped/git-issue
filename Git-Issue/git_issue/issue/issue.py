@@ -22,6 +22,27 @@ class Issue(object):
         self.subscribers: [GitUser] = subscribers
         self.attachments = attachments
 
+    def display(self):
+        print(f"Issue ID:\t{self.id}")
+        print(f"Summary:\t{self.summary}")
+        print(f"Description:\t{self.description}")
+
+        print(f"Status:\t\t{self.status}")
+
+        if self.assignee != None:
+            print(f"Assignee:\t{self.assignee.user}, {self.assignee.email}")
+        else:
+            print("Assignee:\tUnassigned")
+
+        if self.reporter != None:
+            print(f"Reporter:\t{self.reporter.user}, {self.reporter.email}")
+        else:
+            print("Reporter:\tUnassigned")
+
+        print("Subscribers:")
+        for s in self.subscribers:
+            print(f"\t{s.user}, {s.email}")
+
     def __eq__(self, other: object) -> bool:
         if type(other) is not Issue:
             return False
@@ -33,5 +54,6 @@ class Issue(object):
             self.description == o.description and self.status == o.status and\
             self.assignee == o.assignee and self.reporter == o.reporter and\
             self.subscribers == o.subscribers
+
 
 status_indicators = ["open", "closed", "in progress"]
