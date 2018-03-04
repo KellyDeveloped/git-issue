@@ -1,0 +1,20 @@
+{
+    "id": "ISSUE-18",
+    "uuid": 160514721224050152296793832482041078192,
+    "date": "2018-03-04T14:01:21.456534",
+    "summary": "Not checking if comment index exists results in error when there are no comments",
+    "description": "Somewhere along the line we're not checking if the file exists. It's probably happening in the first part of the traceback below.\n\nPartial traceback:\nFile \"D:\\git-issue\\Git-Issue\\git_issue\\issue\\handler.py\", line 189, in get_comment_range\n    return gm.perform_git_workflow(action)\n  File \"D:\\git-issue\\Git-Issue\\git_issue\\git_manager.py\", line 248, in perform_git_workflow\n    result = action()\n  File \"D:\\git-issue\\Git-Issue\\git_issue\\issue\\handler.py\", line 186, in action\n    handler = CommentHandler(_generate_issue_folder_path(issue_id), issue_id)\n  File \"D:\\git-issue\\Git-Issue\\git_issue\\comment\\handler.py\", line 18, in __init__\n    self.index = index.Index.obtain_index(issue_path)\n  File \"D:\\git-issue\\Git-Issue\\git_issue\\comment\\index.py\", line 82, in obtain_index\n    return JsonConvert.FromFile(index_path)\n  File \"D:\\git-issue\\Git-Issue\\git_issue\\utils\\json_utils.py\", line 59, in FromFile\n    with open(filepath, 'r') as jfile:\nFileNotFoundError: [Errno 2] No such file or directory: 'D:\\\\git-issue\\\\issue\\\\ISSUE-5\\\\index.json'",
+    "status": "open",
+    "assignee": null,
+    "reporter": {
+        "user": "Liam Cairns Kelly",
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
+    "attachments": []
+}
