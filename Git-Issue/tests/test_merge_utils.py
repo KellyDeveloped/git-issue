@@ -1,11 +1,13 @@
+import shutil
 import sys
 from pathlib import Path
 
 import os
 
 from comment.index import Index, IndexEntry
+from git_manager import GitManager
 from git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
-    CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver
+    CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver, DivergenceResolutionTool
 from issue.tracker import UUIDTrack, Tracker
 from utils.json_utils import JsonConvert
 
@@ -90,15 +92,28 @@ def second_repo_path():
     return "second-repo"
 
 
-@pytest.fixture(scope='session')
-def first_repo(tmpdir_factory, first_repo_path):
-    return git.Repo.init(tmpdir_factory.mktemp(first_repo_path))
+@pytest.fixture
+def first_repo(tmpdir, first_repo_path):
+    repo = git.Repo.init(tmpdir.mkdir(first_repo_path))
 
+    fake_file_dir = Path(repo.working_dir + "/fake-file.pla")
+    open(fake_file_dir, 'w').close()
+    repo.index.add([str(fake_file_dir)])
+    repo.index.commit("Blah")
 
-@pytest.fixture(scope='session')
-def second_repo(tmpdir_factory, first_repo_path, second_repo_path):
-    repo = git.Repo.init(tmpdir_factory.mktemp(second_repo_path))
-    repo.create_remote("local", f"../{first_repo_path}")
+    gm = GitManager()
+    setattr(gm, "get_choice_from_user", lambda x: True)
+    gm._create_new_issue_branch(repo)
+
+    return repo
+
+@pytest.fixture
+def second_repo(tmpdir, first_repo, second_repo_path):
+    #dir = tmpdir.mkdir(second_repo_path)
+    path = Path(first_repo.working_dir).parent.joinpath("second_repo")
+    shutil.copytree(first_repo.working_dir, path)
+    repo = git.Repo(str(path))
+    repo.create_remote("first", f"{first_repo.git_dir}")
 
     return repo
 
@@ -210,18 +225,67 @@ def test_divergence_resolver(issue_1, issue_2, issue_3, monkeypatch):
     resolved_issues = [issue_1, issue_2, issue_3]
     resolved_tracker = Tracker()
 
+    summary_edit = "This edit resolves the create-edit-divergence"
+    monkeypatch.setattr("builtins.input", lambda x: summary_edit)
+
     for issue in resolved_issues:
         resolved_tracker.track_or_update_uuid(issue.uuid, issue.id)
 
-    issue_2_json = JsonConvert.ToJSON(issue_2)
-    issue_2_copy = JsonConvert.FromJSON(issue_2_json)
-    issue_2_copy.uuid = 53368803138698180295652887974160049016
-    issue_2_copy.summary = "This is actually issue 3"
+    issue_3_json = JsonConvert.ToJSON(issue_3)
+    issue_3_copy = JsonConvert.FromJSON(issue_3_json)
+    issue_3_copy.summary = "This is the edited field for the create-edit-divergence"
+    issue_3_copy.id = issue_2.id
+
+    expected = JsonConvert.FromJSON(issue_3_json)
+    expected.summary = summary_edit
 
     resolver = DivergenceConflictResolver()
     resolver.resolved_tracker = resolved_tracker
     resolver.resolved_conflicts = resolved_issues
-    resolver.diverged_issues = [issue_2_copy]
+    resolver.diverged_issues = [issue_3_copy]
 
     resolution = resolver.generate_resolution()
+    assert resolution.resolved_issues == [expected]
 
+def test_divergence_resolution(issue_3, first_repo):
+    os.chdir(first_repo.working_dir)
+
+    resolution = DivergenceResolutionTool([issue_3])
+    resolution.resolve()
+
+    handler = IssueHandler()
+    result = handler.get_issue_from_issue_id(issue_3.id)
+
+    assert issue_3 == result
+
+def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, first_repo: git.Repo, second_repo: git.Repo,
+                            monkeypatch):
+    # Create, Create-Edit-Divergence, Comment-Index, Manual
+    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("builtins.input", lambda x: 'Y')
+
+    # Set up first repo
+    os.chdir(first_repo.working_dir)
+    handler = IssueHandler()
+
+    handler.store_issue(issue_2, "test", generate_id=True)
+    handler.store_issue(issue_3, "test")
+
+    # Set up second repo
+    os.chdir(second_repo.working_dir)
+    handler = IssueHandler()
+    handler.store_issue(issue_1, "test", generate_id=True)
+
+    issue_3_json = JsonConvert.ToJSON(issue_3)
+    issue_3_copy = JsonConvert.FromJSON(issue_3_json)
+    issue_3_copy.summary = "Edited Summary"
+
+    handler.store_issue(issue_2, "test")
+    handler.store_issue(issue_3, "test")
+
+    second_repo.git.checkout("issue")
+    second_repo.git.pull("first", GitManager.ISSUE_BRANCH)
+
+    merger = GitMerge(second_repo)
+    conflicts = merger.parse_unmerged_conflicts()
+    print (conflicts)

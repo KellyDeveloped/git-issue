@@ -99,7 +99,7 @@ class GitManager(object):
             return
 
 
-        has_remote = len(repo.remotes) > 0 and hasattr(repo.remote().refs, self.ISSUE_BRANCH)
+        has_remote = len(repo.remotes) > 0 and hasattr(repo.refs, self.ISSUE_BRANCH)
         has_local_branch = hasattr(repo.refs, self.ISSUE_BRANCH)
         if not has_local_branch and not has_remote:
             self._create_new_issue_branch(repo)

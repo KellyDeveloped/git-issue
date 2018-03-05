@@ -97,6 +97,24 @@ class CommentIndexResolutionTool(ResolutionTool):
     def resolve(self):
         self.index.store_index(self.path)
 
+class DivergenceResolutionTool(ResolutionTool):
+
+    def __init__(self, resolved_issues: [Issue]):
+        self.resolved_issues = resolved_issues
+
+    def resolve(self):
+        gm = GitManager()
+        paths = []
+        handler = IssueHandler()
+
+        for issue in self.resolved_issues:
+            file_path = handler.get_issue_path(issue)
+            JsonConvert.ToFile(issue, file_path)
+            paths.append(str(file_path))
+
+        gm.add_to_index(paths)
+        gm.commit("create-edit-divergence-conflict-resolution")
+
 
 class ConflictResolver(ABC):
 
@@ -197,21 +215,25 @@ class DivergenceConflictResolver(ConflictResolver):
         self.resolved_conflicts: [Issue] = []
         self.resolved_tracker: Tracker = None
 
-    def _get_edit_resolution(self, diverged: Issue, current: Issue):
+    def _get_edit_resolution(self, diverged: Issue, current: Issue) -> Issue:
         print(f"Issue with ID {diverged.id} and UUID {diverged.uuid} has been changed to {current.id} in a previous "
               f"merge conflict resolution.")
 
         print("Please examine the two issues and give a resolution to the conflicts when prompted")
-
-        diverged.display()
+        print("\nHEAD:-")
         current.display()
+        print("\nMERGE HEAD:-")
+        diverged.display()
         updated_issue = deepcopy(current)
+
+        diverged.id = current.id
 
         fields = self._get_edited_fields(diverged, current)
         for field, div, curr in fields:
             edit = input(f"Resolution for {field}:")
             setattr(updated_issue, field, edit)
 
+        return updated_issue
 
     def _get_edited_fields(self, diverged, current):
         diff = []
@@ -250,8 +272,15 @@ class DivergenceConflictResolver(ConflictResolver):
             "one branch has been edited, after it has been resolved as a create conflict "\
             "on another branch that is being merged with the current branch.")
 
+        resolved_issues = []
+
         for diverged, match in matching_issues:
-            self._get_edit_resolution(diverged, match)
+            resolved = self._get_edit_resolution(diverged, match)
+            resolved_issues.append(resolved)
+
+        resolution = DivergenceResolutionTool(resolved_issues)
+
+        return resolution
 
 
 class GitMerge(object):
@@ -319,54 +348,3 @@ class GitMerge(object):
         resolver.resolved_tracker = resolved_tracker
 
         return resolver
-
-    def begin_conflict_resolution(self) -> [ConflictInfo]:
-        indexConflicts = CommentIndexConflictResolver()
-        createConflicts = CreateConflictResolver()
-        divergenceConflict = DivergenceConflictResolver()
-        manualConflicts = []
-
-        unmerged_blobs = self.repo.index.unmerged_blobs()
-        for unmerged_file in unmerged_blobs:
-            conflicts = []
-
-            for (stage, blob) in unmerged_blobs[unmerged_file]:
-                if stage != 0:
-                    data = blob.data_stream.read().decode()
-                    obj = JsonConvert.FromJSON(data)
-
-                    conflicts.append(obj)
-
-            info = ConflictInfo(unmerged_file, conflicts)
-
-            if info.type is ConflictType.CREATE:
-                createConflicts.conflicts.append(info)
-
-            elif info.type is ConflictType.CREATE_EDIT_DIVERGENCE:
-                diverged = info.conflicts[1] if info.conflicts[0] == info.conflicts[1] else info.conflicts[2]
-                divergenceConflict.diverged_issues.append(diverged)
-
-            elif info.type is ConflictType.TRACKER:
-                if len(info.conflicts) == 3:
-                    createConflicts.tracker = info.conflicts[0]
-                else:
-                    tracked = [tracker.tracked_uuids for tracker in conflicts]
-                    unique = list(set(tracked))
-
-                    createConflicts.tracker = Tracker(len(unique), unique)
-                    
-            # elif info.type is ConflictType.COMMENT_INDEX:
-                # indexConflicts.conflicts.append(conflict)
-
-            # else:
-            #     manualConflicts.append(conflict)
-
-        for conflict in createConflicts.conflicts:
-            print (f"{conflict.id} || {conflict.uuid} || {conflict.date}")
-
-        conflictResolution = createConflicts.generate_resolution()
-
-        for resolution in conflictResolution:
-            print (f"{resolution.id} || {resolution.uuid} || {resolution.date}")
-
-        return manualConflicts
