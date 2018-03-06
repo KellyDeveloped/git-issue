@@ -25,8 +25,6 @@ class IndexEntry(object):
 class Index(object):
     """This is an index register of all comments for an issue. It keeps track of all files and their creation date."""
 
-    _path_to_index: Path = None
-
     def __init__(self, entries: [IndexEntry] = []):
         self.entries = entries
 
@@ -61,8 +59,9 @@ class Index(object):
 
             pos = pos + offset
 
-    def store_index(self, path=None):
-        loc = path if path is not None else self._path_to_index
+    def store_index(self, path):
+        loc = Path(path) if path is not None else self._path_to_index
+        print(self)
         JsonConvert.ToFile(self, loc)
         gm = GitManager()
         gm.add_to_index([str(loc)])
@@ -78,11 +77,10 @@ class Index(object):
     def obtain_index(cls, path):
         index_path = cls._generate_index_path(path)
         
-        if (index_path.exists):
+        if (index_path.exists()):
             return JsonConvert.FromFile(index_path)
         else:
             index = Index()
-            index._path_to_index = index_path
             return index
 
     def __eq__(self, object: object) -> bool:
