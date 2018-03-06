@@ -59,8 +59,8 @@ class Index(object):
 
             pos = pos + offset
 
-    def store_index(self, path):
-        loc = Path(path) if path is not None else self._path_to_index
+    def store_index(self, issue_id):
+        loc = self._generate_index_path(Path(issue_id)) if issue_id is not None else self._path_to_index
         print(self)
         JsonConvert.ToFile(self, loc)
         gm = GitManager()
