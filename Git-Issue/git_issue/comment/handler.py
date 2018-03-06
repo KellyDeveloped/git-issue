@@ -16,6 +16,7 @@ class CommentHandler(object):
 
         self.folder_path = self._generate_folder_path(issue_id)
         self.index = index.Index.obtain_index(issue_path)
+        self.issue_path = issue_path
         self.issue_id = issue_id
 
     def _generate_folder_path(self, issue_id):
@@ -42,6 +43,7 @@ class CommentHandler(object):
             return [str(self.generate_comment_path(comment.uuid))]
 
         def action():
+            self.index = index.Index.obtain_index(self.issue_path)
             path = self.generate_comment_path(comment.uuid)
             JsonConvert.ToFile(comment, path)
             self.index.add_entry(path, comment)
