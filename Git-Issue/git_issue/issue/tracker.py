@@ -25,9 +25,9 @@ class Tracker(object):
 
     ISSUE_IDENTIFIER = "ISSUE"
 
-    def __init__(self, issue_count=0, tracked_uuids:[UUIDTrack]=[]):
+    def __init__(self, issue_count=0, tracked_uuids:[UUIDTrack]=None):
         self.issue_count = issue_count
-        self.tracked_uuids = tracked_uuids
+        self.tracked_uuids = tracked_uuids if tracked_uuids is not None else []
 
     def increment_issue_count(self):
         self.issue_count += 1

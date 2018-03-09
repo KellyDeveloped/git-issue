@@ -39,9 +39,18 @@ class GitManager(object):
         issue_files_exist = git_dir.match(f"*worktrees/{self.ISSUE_BRANCH}") or Path.exists(worktree_path)
         return worktrees_exist and issue_files_exist
 
-    def _does_repo_have_issue_remote(self, repo):
-        #rs = [r for r in repo.remote().refs if r.remote_head == self.ISSUE_BRANCH]
-        return True
+    @classmethod
+    def is_worktree(cls):
+        repo = cls.obtain_repo()
+        working_dir = Path(repo.working_dir)
+        issue_dir = working_dir.joinpath(cls.ISSUE_BRANCH)
+
+        return working_dir.match(f"*/{cls.ISSUE_BRANCH}") or Path.exists(issue_dir)
+
+    @classmethod
+    def is_inside_branch(cls):
+        repo = cls.obtain_repo()
+        return repo.active_branch == cls.ISSUE_BRANCH
 
     def get_choice_from_user(self, confirm_msg) -> bool:
         create = input(confirm_msg).capitalize()
@@ -110,9 +119,9 @@ class GitManager(object):
 
         worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
 
-        if not os.path.exists(path) and os.path.exists(worktree_path):
+        if not os.path.exists(path) and self.is_worktree():
             shutil.rmtree(worktree_path)
-        elif os.path.exists(path) and not os.path.exists(worktree_path):
+        elif os.path.exists(path) and not self.is_worktree():
             print(f"An issue folder already exists at location {path}.")
             print("This folder is required to create a worktree of the issue branch.")
             print("As this could be a user-created folder, I need confirmation on if I can delete this folder.")
@@ -189,18 +198,14 @@ class GitManager(object):
         print("Pushing to issue branch")
         repo.remote().push(self.ISSUE_BRANCH)
 
-    def commit(self, cmd, id: str = None, new_branch=False):
+    def commit(self, cmd=None, id: str = None, new_branch=False):
         commit_message = f"Action {cmd} performed"
 
         if id != None:
             commit_message = f"{commit_message} on issue: {id}"
 
-        # print("committing the following files:")
-        # for path in paths:
-        #    print(f"\t{path}")
-        # print("\nwith the commit message: {commit_message}")
-
         repo = self.obtain_repo()
+
         if new_branch:
             repo.index.commit(commit_message, parent_commits=None)
         else:

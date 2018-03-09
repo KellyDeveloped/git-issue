@@ -4,6 +4,7 @@ from pathlib import Path
 
 import os
 
+from comment.handler import CommentHandler
 from comment.index import Index, IndexEntry
 from git_manager import GitManager
 from git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
@@ -101,19 +102,20 @@ def first_repo(tmpdir, first_repo_path):
     repo.index.add([str(fake_file_dir)])
     repo.index.commit("Blah")
 
+    os.chdir(repo.working_dir)
     gm = GitManager()
     setattr(gm, "get_choice_from_user", lambda x: True)
-    gm._create_new_issue_branch(repo)
+    gm.load_issue_branch()
 
     return repo
 
 @pytest.fixture
-def second_repo(tmpdir, first_repo, second_repo_path):
-    #dir = tmpdir.mkdir(second_repo_path)
+def second_repo(first_repo):
     path = Path(first_repo.working_dir).parent.joinpath("second_repo")
-    shutil.copytree(first_repo.working_dir, path)
+    git.Repo.clone_from(first_repo.working_dir, path)
     repo = git.Repo(str(path))
-    repo.create_remote("first", f"{first_repo.git_dir}")
+    repo.create_remote("other", f"{first_repo.git_dir}")
+    first_repo.create_remote("other", f"{repo.git_dir}")
 
     return repo
 
@@ -121,7 +123,7 @@ def second_repo(tmpdir, first_repo, second_repo_path):
 def test_create_resolver(issue_1: Issue, issue_2: Issue, monkeypatch, first_repo: git.Repo):
     issue_2.id = "ISSUE-1" # Cause a conflict with the ID's
 
-    issues = [issue_1, issue_2]
+    issues = [ConflictInfo("Fake_Path", [issue_1, issue_2])]
 
     os.chdir(first_repo.working_dir)
     monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
@@ -143,10 +145,11 @@ def test_create_resolution(issue_1: Issue, issue_2: Issue, monkeypatch, first_re
 
     issue_1_path = handler.get_issue_path(issue_1)
     issue_2_path = handler.get_issue_path(issue_2)
-    issues = [(issue_1, str(issue_1_path)), (issue_2, str(issue_2_path))]
+    issues = [issue_1, issue_2]
 
     os.chdir(first_repo.working_dir)
     monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     uuids = [UUIDTrack(issue_1.uuid, issue_1.id), UUIDTrack(issue_2.uuid, issue_2.id)]
 
@@ -157,11 +160,11 @@ def test_create_resolution(issue_1: Issue, issue_2: Issue, monkeypatch, first_re
     assert issue_1_path.exists()
     assert issue_2_path.exists()
 
-    result_1 = handler.get_issue_from_issue_id(issues[0][0].id)
-    result_2 = handler.get_issue_from_issue_id(issues[1][0].id)
+    result_1 = handler.get_issue_from_issue_id(issues[0].id)
+    result_2 = handler.get_issue_from_issue_id(issues[1].id)
 
-    assert result_1 == issues[0][0]
-    assert result_2 == issues[1][0]
+    assert issues[0] == result_1
+    assert issues[1] == result_2
 
 def test_produce_create_resolver(issue_1: Issue, issue_2: Issue, first_repo):
     conflict = ConflictInfo("fake_path", [issue_1, issue_2])
@@ -218,8 +221,8 @@ def test_produce_divergence_resolver(issue_1, issue_2, issue_3, first_repo):
 
     merger = GitMerge(first_repo)
     resolver = merger.produce_create_edit_divergence_resolver([conflict], resolved_issues, resolved_tracker)
-    assert resolver.resolved_conflicts == resolved_issues and resolver.resolved_tracker == resolved_tracker
-    assert resolver.diverged_issues == [issue_2_copy]
+    assert resolved_issues == resolver.resolved_conflicts and resolved_tracker == resolver.resolved_tracker
+    assert [(issue_2, issue_2_copy)] == resolver.diverged_issues
 
 def test_divergence_resolver(issue_1, issue_2, issue_3, monkeypatch):
     resolved_issues = [issue_1, issue_2, issue_3]
@@ -242,13 +245,14 @@ def test_divergence_resolver(issue_1, issue_2, issue_3, monkeypatch):
     resolver = DivergenceConflictResolver()
     resolver.resolved_tracker = resolved_tracker
     resolver.resolved_conflicts = resolved_issues
-    resolver.diverged_issues = [issue_3_copy]
+    resolver.diverged_issues = [(issue_3, issue_3_copy)]
 
     resolution = resolver.generate_resolution()
-    assert resolution.resolved_issues == [expected]
+    assert [issue_3, expected] == resolution.resolved_issues
 
-def test_divergence_resolution(issue_3, first_repo):
+def test_divergence_resolution(issue_3, first_repo, monkeypatch):
     os.chdir(first_repo.working_dir)
+    monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     resolution = DivergenceResolutionTool([issue_3])
     resolution.resolve()
@@ -261,31 +265,83 @@ def test_divergence_resolution(issue_3, first_repo):
 def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, first_repo: git.Repo, second_repo: git.Repo,
                             monkeypatch):
     # Create, Create-Edit-Divergence, Comment-Index, Manual
+    issue_2_json = JsonConvert.ToJSON(issue_2)
+    issue_2_copy = JsonConvert.FromJSON(issue_2_json)
+    issue_2_copy.summary = "Edited Summary"
+
     monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
     monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
-    # Set up first repo
+    def merge(repo):
+        try:
+            repo.git.checkout("issue")
+            repo.git.pull("--allow-unrelated-histories", "other", GitManager.ISSUE_BRANCH)
+        except:
+            pass
+
+        merger = GitMerge(repo)
+        return merger.parse_unmerged_conflicts()
+
+    # Set up first repo for Create conflict
     os.chdir(first_repo.working_dir)
     handler = IssueHandler()
-
     handler.store_issue(issue_2, "test", generate_id=True)
-    handler.store_issue(issue_3, "test")
 
-    # Set up second repo
+    # Set up second repo for Create conflict
     os.chdir(second_repo.working_dir)
     handler = IssueHandler()
     handler.store_issue(issue_1, "test", generate_id=True)
 
-    issue_3_json = JsonConvert.ToJSON(issue_3)
-    issue_3_copy = JsonConvert.FromJSON(issue_3_json)
-    issue_3_copy.summary = "Edited Summary"
+    result = merge(second_repo)
+    expected = [ConflictInfo("ISSUE-1/issue.json", [issue_1, issue_2])]
+    assert expected == result
+    resolver = GitMerge(second_repo).produce_create_resolver(result)
+    resolution = resolver.generate_resolution()
+    resolution.resolve()
 
-    handler.store_issue(issue_2, "test")
-    handler.store_issue(issue_3, "test")
+    # Set up first repo for divergence conflict
+    os.chdir(first_repo.working_dir)
+    handler = IssueHandler()
+    issue_2_copy.id = issue_1.id
+    handler.store_issue(issue_2_copy, "test")
 
-    second_repo.git.checkout("issue")
-    second_repo.git.pull("first", GitManager.ISSUE_BRANCH)
+    os.chdir(second_repo.working_dir)
+    result = merge(second_repo)
+    expected = [ConflictInfo("ISSUE-1/issue.json", [issue_2, issue_1, issue_2_copy])]
+    assert expected == result
+    resolver = GitMerge(second_repo).produce_create_edit_divergence_resolver(result, resolution.resolved_issues, resolution.tracker)
+    resolver.generate_resolution().resolve()
 
-    merger = GitMerge(second_repo)
-    conflicts = merger.parse_unmerged_conflicts()
-    print (conflicts)
+    # Edit conflict
+    issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
+    issue_1_json = JsonConvert.ToJSON(issue_1)
+    issue_1_first_repo = JsonConvert.FromJSON(issue_1_json)
+    issue_1_second_repo = JsonConvert.FromJSON(issue_1_json)
+    issue_1_first_repo.summary = "First Repo"
+    issue_1_second_repo.summary = "Second Repo"
+
+    # Set up both repos with the issue that will be used as a conflict
+    os.chdir(first_repo.working_dir)
+    handler = IssueHandler()
+    handler.store_issue(issue_1, "test")
+    os.chdir(second_repo.working_dir)
+    result = merge(second_repo)
+
+    # Edit first repo
+    os.chdir(first_repo.working_dir)
+    handler.store_issue(issue_1_first_repo, "test")
+
+    # Edit second repo
+    os.chdir(second_repo.working_dir)
+    handler = IssueHandler()
+    handler.store_issue(issue_1_second_repo, "issue 10 edit")
+    result = merge(second_repo)
+
+    expected = [ConflictInfo("ISSUE-10/issue.json", [issue_1, issue_1_second_repo, issue_1_first_repo])]
+    assert expected == result
+
+    # Comment
+    os.chdir(first_repo.working_dir)
+    handler = IssueHandler()
+    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
+    comment_handler.add_comment()

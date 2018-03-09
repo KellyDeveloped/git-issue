@@ -8,8 +8,8 @@ from comment.handler import CommentHandler
 
 class IssueHandler(object):
     
-    def __init__(self, tracker=Tracker.obtain_tracker()):
-        self.tracker = tracker
+    def __init__(self, tracker=None):
+        self.tracker = tracker if tracker is not None else Tracker.obtain_tracker()
 
     def generate_issue_id(self, count: int = None):
         num = self.tracker.issue_count + 1 if count is None else count
@@ -23,8 +23,8 @@ class IssueHandler(object):
     def _generate_issue_folder_path(id):
         dir = Path.cwd()
 
-        if dir.parts[-1] != "issue":
-            dir = dir.joinpath("issue")
+        # if GitManager.is_worktree():
+        #     dir = dir.joinpath("issue")
 
         return dir.joinpath(id)
 
@@ -32,18 +32,18 @@ class IssueHandler(object):
         return Path.cwd().joinpath(f"{self._generate_issue_folder_path(id)}/issue.json")
 
     def get_issue_path(self, issue: Issue):
-        return _generate_issue_file_path(issue.id)
+        return self._generate_issue_file_path(issue.id)
 
     def store_issue(self, issue, cmd, generate_id=False):
         def gen_paths():
-            return [str(_generate_issue_file_path(issue.id))]
+            return [str(self._generate_issue_file_path(issue.id))]
     
         def action():
             if generate_id:
                 issue.id = self.generate_issue_id()
                 self.tracker.increment_issue_count()
 
-            JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
+            JsonConvert.ToFile(issue, self._generate_issue_file_path(issue.id))
             self.tracker.track_or_update_uuid(issue.uuid, issue.id)
 
             return issue
@@ -59,7 +59,7 @@ class IssueHandler(object):
         gm = GitManager()
         try:    
             return gm.perform_git_workflow(lambda: JsonConvert.FromFile(_generate_issue_file_path(id)))
-        except IOError:
+        except FileNotFoundError:
             return None
 
     def display_issue(issue, with_comments=False):

@@ -70,7 +70,7 @@ class ResolutionTool(ABC):
 
 class CreateResolutionTool(ResolutionTool):
 
-    def __init__(self, resolved_issues: [Issue, str], tracker: Tracker):
+    def __init__(self, resolved_issues: [(Issue, str)], tracker: Tracker):
         self.resolved_issues = resolved_issues
         self.tracker = tracker
 
@@ -78,14 +78,20 @@ class CreateResolutionTool(ResolutionTool):
         gm = GitManager()
         paths = []
 
-        for issue, path in self.resolved_issues:
-            file_path = Path(path)
+        gm.load_issue_branch()
+        for issue in self.resolved_issues:
+            handler = IssueHandler()
+            file_path = handler.get_issue_path(issue)
             JsonConvert.ToFile(issue, file_path)
-            paths.append(path)
+            paths.append(str(file_path))
 
         self.tracker.store_tracker()
-        gm.add_to_index(paths)
-        gm.commit("create-conflict-resolution")
+
+        repo = gm.obtain_repo()
+        for path in paths:
+            repo.git.add(path)
+
+        repo.git.commit("-m", "create_conflict_resolution")
 
 
 class CommentIndexResolutionTool(ResolutionTool):
@@ -104,6 +110,7 @@ class DivergenceResolutionTool(ResolutionTool):
 
     def resolve(self):
         gm = GitManager()
+        gm.load_issue_branch()
         paths = []
         handler = IssueHandler()
 
@@ -112,9 +119,11 @@ class DivergenceResolutionTool(ResolutionTool):
             JsonConvert.ToFile(issue, file_path)
             paths.append(str(file_path))
 
-        gm.add_to_index(paths)
-        gm.commit("create-edit-divergence-conflict-resolution")
+        repo = gm.obtain_repo()
+        for path in paths:
+            repo.git.add(path)
 
+        repo.git.commit("-m", "create-edit-divergence-conflict-resolution")
 
 class ConflictResolver(ABC):
 
@@ -130,7 +139,7 @@ class CreateConflictResolver(ConflictResolver):
     """
 
     def __init__(self):
-        self.conflicts: [Issue] = []
+        self.conflicts: [ConflictInfo] = []
         self.tracker: Tracker = None
 
     def generate_resolution(self):
@@ -143,7 +152,11 @@ class CreateConflictResolver(ConflictResolver):
         """
 
         # Create copies of data to avoid mutating them as a side affect
-        conflicts = self.conflicts.copy()
+        conflicts = []
+
+        for info in self.conflicts:
+            for issue in info.conflicts:
+                conflicts.append(issue)
 
         if self.tracker is None:
             tracker = Tracker.obtain_tracker()
@@ -250,15 +263,25 @@ class DivergenceConflictResolver(ConflictResolver):
     def generate_resolution(self):
         matching_issues: (Issue, Issue) = []
         diverged_issues = self.diverged_issues
+        resolved_issues = []
 
         for resolved in self.resolved_conflicts:
             found = False
             diverged_index = 0
 
-            for diverged in diverged_issues:
-                if diverged.uuid == resolved.uuid:
+            for stage_2, stage_3 in diverged_issues:
+                match = None
+
+                if stage_2.uuid == resolved.uuid and stage_2.id != resolved.id:
+                    match = stage_2
+                    resolved_issues.append(stage_3)
+                elif stage_3.uuid == resolved.uuid and stage_3.id != resolved.id:
+                    match = stage_3
+                    resolved_issues.append(stage_2)
+
+                if match is not None:
                     found = True
-                    matching_issues.append((diverged, resolved))
+                    matching_issues.append((match, resolved))
                     break
                 diverged_index += 1
 
@@ -266,13 +289,23 @@ class DivergenceConflictResolver(ConflictResolver):
                 del diverged_issues[diverged_index]
 
         handler = IssueHandler(self.resolved_tracker)
-        matching_issues += [(diverged, handler.get_issue_from_uuid(diverged.uuid)) for diverged in diverged_issues]
+
+        for stage_2, stage_3 in diverged_issues:
+            loaded_stage_2 = handler.get_issue_from_uuid(stage_2.uuid)
+            loaded_stage_3 = handler.get_issue_from_uuid(stage_3.uuid)
+
+            if loaded_stage_2 is not None:
+                matching_issues.append((stage_2, loaded_stage_2))
+                resolved_issues.append(stage_3)
+            elif loaded_stage_3 is not None:
+                matching_issues.append((stage_3, loaded_stage_3))
+                resolved_issues.append(stage_2)
+            else:
+                raise DivergenceMatchMissingError(stage_2, stage_3, "Failed to discern the stage that is diverged")
 
         print("One or more create-edit divergencies have been identified. This is when an issue on "\
             "one branch has been edited, after it has been resolved as a create conflict "\
             "on another branch that is being merged with the current branch.")
-
-        resolved_issues = []
 
         for diverged, match in matching_issues:
             resolved = self._get_edit_resolution(diverged, match)
@@ -339,7 +372,7 @@ class GitMerge(object):
             # Head should always equal common ancestor, but in the event it's ever the merge head that equals
             # the common ancestor and not the head then we need to work from that instead. Branch should never
             # be hit, but is there as a safety precaution
-            diverged = info.conflicts[2] if info.conflicts[0] == info.conflicts[1] else info.conflicts[1]
+            diverged = (info.conflicts[1], info.conflicts[2])
             diverged_issues.append(diverged)
 
         resolver = DivergenceConflictResolver()
@@ -348,3 +381,16 @@ class GitMerge(object):
         resolver.resolved_tracker = resolved_tracker
 
         return resolver
+
+    def filter_manual_conflicts(self, conflicts: [ConflictInfo] = None):
+        return self._get_conflicts_of_type(ConflictType.MANUAL, conflicts)
+
+
+class DivergenceMatchMissingError(Exception):
+
+    def __init__(self, stage_2: Issue, stage_3: Issue, message):
+        message += f"\n\nstage_2: {stage_2.id}, {stage_2.uuid}\nStage 3: {stage_3.id}, {stage_3.uuid}"
+
+        super(Exception, self).__init__(message)
+        self.stage_2 = stage_2
+        self.stage_3 = stage_3
