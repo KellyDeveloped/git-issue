@@ -1,6 +1,7 @@
 import comment.index as index
 from pathlib import Path
 from comment.comment import Comment
+from comment.index import IndexEntry
 from utils.json_utils import JsonConvert
 from git_manager import GitManager
 from issue.issue import Issue
@@ -36,7 +37,7 @@ class CommentHandler(object):
     def _get_list_of_comments(self, entries):
         return [self._get_comment(e) for e in entries]
 
-    def add_comment(self, comment) -> Path:
+    def add_comment(self, comment) -> IndexEntry:
         gm = GitManager()
 
         def gen_paths():
@@ -46,8 +47,9 @@ class CommentHandler(object):
             self.index = index.Index.obtain_index(self.issue_path)
             path = self.generate_comment_path(comment.uuid)
             JsonConvert.ToFile(comment, path)
-            self.index.add_entry(path, comment)
+            entry = self.index.add_entry(path, comment)
             self.index.store_index(self.issue_id)
+            return entry
 
         return gm.perform_git_workflow(action, True, gen_paths, "add_comment", self.issue_id)
 

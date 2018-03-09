@@ -14,9 +14,8 @@ class Comment(object):
         comment the New York's user would appear to be made before the Bangalore comment due
         to it being in an earlier timezone. """
 
-    def __init__(self, comment:str="", user:GitUser=GitUser(), date=date_utils.get_date_now(),
-                uuid=uuid.uuid4().int):
+    def __init__(self, comment: str="", user: GitUser=None, date=None, id=None):
         self.comment = comment
-        self.user = user
-        self.date = date
-        self.uuid = uuid
+        self.user = user if user is not None else GitUser()
+        self.date = date if date is not None else date_utils.get_date_now()
+        self.uuid = uuid if id is not None else uuid.uuid4().int

@@ -4,6 +4,7 @@ from pathlib import Path
 
 import os
 
+from comment import Comment
 from comment.handler import CommentHandler
 from comment.index import Index, IndexEntry
 from git_manager import GitManager
@@ -312,6 +313,27 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     resolver = GitMerge(second_repo).produce_create_edit_divergence_resolver(result, resolution.resolved_issues, resolution.tracker)
     resolver.generate_resolution().resolve()
 
+    # Comment
+    os.chdir(first_repo.working_dir)
+    handler = IssueHandler()
+    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
+    first_comment = Comment("first repo")
+    first_entry = comment_handler.add_comment(first_comment)
+
+    # Comment
+    os.chdir(second_repo.working_dir)
+    handler = IssueHandler()
+    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
+    second_comment = Comment("second repo")
+    second_entry = comment_handler.add_comment(second_comment)
+
+    result = merge(second_repo)
+    expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
+
+    assert expected == result
+    resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
+    resolver.generate_resolution().resolve()
+
     # Edit conflict
     issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
     issue_1_json = JsonConvert.ToJSON(issue_1)
@@ -339,9 +361,3 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
 
     expected = [ConflictInfo("ISSUE-10/issue.json", [issue_1, issue_1_second_repo, issue_1_first_repo])]
     assert expected == result
-
-    # Comment
-    os.chdir(first_repo.working_dir)
-    handler = IssueHandler()
-    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
-    comment_handler.add_comment()

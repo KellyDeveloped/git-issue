@@ -25,8 +25,8 @@ class IndexEntry(object):
 class Index(object):
     """This is an index register of all comments for an issue. It keeps track of all files and their creation date."""
 
-    def __init__(self, entries: [IndexEntry] = []):
-        self.entries = entries
+    def __init__(self, entries: [IndexEntry] = None):
+        self.entries = entries if entries is not None else []
 
     def has_entry(self, path: Path):
         for entry in self.entries:
@@ -35,9 +35,10 @@ class Index(object):
 
         return False
 
-    def add_entry(self, comment_path: Path, comment):
-        issue = IndexEntry(str(comment_path), comment.date)
-        self.entries.append(issue)
+    def add_entry(self, comment_path: Path, comment) -> IndexEntry:
+        entry = IndexEntry(str(comment_path), comment.date)
+        self.entries.append(entry)
+        return entry
 
     def get_entry(self, path: Path) -> IndexEntry:
         for entry in self.entries:
