@@ -21,5 +21,5 @@ install:
 
 script: 
   - cd Git-Issue
-  - pytest "tests\test_issue_handler.py"
-  - pytest "tests\test_merge_utils.py"
+  - pytest "tests/test_issue_handler.py"
+  - pytest "tests/test_merge_utils.py"
