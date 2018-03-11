@@ -1,6 +1,7 @@
 import shutil
 import sys
 from pathlib import Path
+sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
 
 import os
 
@@ -321,18 +322,18 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     first_entry = comment_handler.add_comment(first_comment)
 
     # Comment
-    os.chdir(second_repo.working_dir)
-    handler = IssueHandler()
-    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
-    second_comment = Comment("second repo")
-    second_entry = comment_handler.add_comment(second_comment)
-
-    result = merge(second_repo)
-    expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
-
-    assert expected == result
-    resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
-    resolver.generate_resolution().resolve()
+    # os.chdir(second_repo.working_dir)
+    # handler = IssueHandler()
+    # comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
+    # second_comment = Comment("second repo")
+    # second_entry = comment_handler.add_comment(second_comment)
+    #
+    # result = merge(second_repo)
+    # expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
+    #
+    # assert expected == result
+    # resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
+    # resolver.generate_resolution().resolve()
 
     # Edit conflict
     issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
