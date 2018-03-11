@@ -9,9 +9,9 @@ matrix:
         - os: windows
           python: 3.6
           env: TOXENV=py36
-        - os: osx
-          language: generic
-          env: TOXENV=3.6.2
+        # - os: osx
+        #   language: generic
+        #   env: TOXENV=3.6.2
 
 before_install:
   - ./.travis/osx-setup.sh
