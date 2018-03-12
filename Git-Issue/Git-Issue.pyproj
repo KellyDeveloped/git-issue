@@ -12,7 +12,7 @@
     <RootNamespace>Git-Issue</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>comment --issue ISSUE-1 -c "Test comment"</CommandLineArguments>
+    <CommandLineArguments>show</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
@@ -81,6 +81,7 @@
     <Content Include="launch-options.txt">
       <SubType>Code</SubType>
     </Content>
+    <Content Include="tslint.json" />
   </ItemGroup>
   <ItemGroup>
     <Interpreter Include="env\">
