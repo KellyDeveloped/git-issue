@@ -87,8 +87,8 @@ def edit(args):
 
     issue.summary = args.summary if args.summary != None else issue.summary
     issue.description = args.description if args.description != None else issue.description
-    issue.assignee = args.assignee if args.assignee != None else issue.assignee
-    issue.reporter = args.reporter if args.reporter != None else issue.reporter
+    issue.assignee = GitUser(email=args.assignee) if args.assignee != None else issue.assignee
+    issue.reporter = GitUser(email=args.reporter) if args.reporter != None else issue.reporter
     issue.status = args.status if args.status != None else issue.status
 
     print()
