@@ -5,7 +5,9 @@
     "summary": "Ability to comment on issues",
     "description": "We need some way for the team to discuss any given issue. What's the best way to store these issues? How can we let those who care know when a comments been added?",
     "status": "closed",
-    "assignee": null,
+    "assignee": {
+        "email": "liamcairnskelly@gmail.com"
+    },
     "reporter": {
         "email": "liamcairnskelly@gmail.com"
     },
