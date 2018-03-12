@@ -44,8 +44,8 @@ class GitManager(object):
         repo = cls.obtain_repo()
         working_dir = Path(repo.working_dir)
         issue_dir = working_dir.joinpath(cls.ISSUE_BRANCH)
-
-        return working_dir.match(f"*/{cls.ISSUE_BRANCH}") or Path.exists(issue_dir)
+        worktree_path = Path(repo.git_dir).joinpath("worktrees/issue")
+        return working_dir.match(f"*/{cls.ISSUE_BRANCH}") or Path.exists(issue_dir) or worktree_path.exists()
 
     @classmethod
     def is_inside_branch(cls):

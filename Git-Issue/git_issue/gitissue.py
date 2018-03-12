@@ -86,7 +86,7 @@ def comment(args):
         
 
 def show(args):
-    if hasattr(args, "issue"):
+    if args.issue is not None:
         issue = issue_handler.get_issue(args.issue)
         
         if issue == None:
@@ -97,6 +97,7 @@ def show(args):
         list(args)
 
 def list(args):
+    handler = issue_handler.IssueHandler()
     issues = issue_handler.get_all_issues()
     for i in issues:
         issue_handler.display_issue(i)
