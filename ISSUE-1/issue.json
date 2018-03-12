@@ -1,15 +1,14 @@
 {
     "id": "ISSUE-1",
+    "uuid": 109089699153203392666542611843086704561,
     "date": "2018-02-02T21:08:59.910512",
     "summary": "Add OSX support for Travis build",
     "description": "OSX build support isn't something Travis provides out-of-the-box, but it's easily do-able and they tell you how to do it here: https://docs.travis-ci.com/user/multi-os/#Python-example-(unsupported-languages)",
-    "status": "open",
+    "status": "closed",
     "assignee": {
-        "user": "Liam Cairns Kelly",
         "email": "liamcairnskelly@gmail.com"
     },
     "reporter": {
-        "user": "Liam Cairns Kelly",
         "email": "liamcairnskelly@gmail.com"
     },
     "subscribers": [],

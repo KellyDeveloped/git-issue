@@ -1,0 +1,20 @@
+{
+    "id": "ISSUE-7",
+    "uuid": 336417521940524036556829132308986455172,
+    "date": "2018-03-04T15:46:17.803130",
+    "summary": "Test suite for RESTful backend",
+    "description": null,
+    "status": "open",
+    "assignee": null,
+    "reporter": {
+        "user": "Liam Cairns Kelly",
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
+    "attachments": []
+}

@@ -1,0 +1,33 @@
+{
+    "id": "ISSUE-11",
+    "uuid": 109089699153203392666542611843086704561,
+    "date": "2018-03-12T21:25:24.712188",
+    "summary": "Subscribing on web UI for edit can't submit on its own",
+    "description": "The form appears to be invalid when the only thing you change is the subscriber and so you can't submit. This shouldn't be the case.",
+    "status": "open",
+    "assignee": {
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "reporter": {
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "email": "liamcairnskelly@gmail.com",
+            "user": "Liam Cairns Kelly"
+        },
+        {
+            "email": "liamcairnskelly@gmail.com",
+            "user": "Liam Cairns Kelly"
+        },
+        {
+            "email": "liamcairnskelly@gmail.com",
+            "user": "Liam Cairns Kelly"
+        },
+        {
+            "email": "liamcairnskelly@gmail.com",
+            "user": "Liam Cairns Kelly"
+        }
+    ],
+    "attachments": []
+}

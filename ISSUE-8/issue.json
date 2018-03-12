@@ -1,0 +1,20 @@
+{
+    "id": "ISSUE-8",
+    "uuid": 70155862981491340512344055785057646812,
+    "date": "2018-03-04T16:15:50.440525",
+    "summary": "Add tests for angular UI",
+    "description": null,
+    "status": "open",
+    "assignee": null,
+    "reporter": {
+        "user": "Liam Cairns Kelly",
+        "email": "liamcairnskelly@gmail.com"
+    },
+    "subscribers": [
+        {
+            "user": "Liam Cairns Kelly",
+            "email": "liamcairnskelly@gmail.com"
+        }
+    ],
+    "attachments": []
+}
