@@ -17,7 +17,7 @@ export class IssueComponent implements OnInit {
 
 	ngOnInit(): void {
 		this.viewLink = this.issue.id
-		this.editLink = `${this.viewLink}/edit`
+		this.editLink = `/issues/${this.viewLink}/edit`
 	}
 
 }

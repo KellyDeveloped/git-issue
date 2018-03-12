@@ -25,6 +25,7 @@ export class CreateCommentComponent {
 		this.issueService.addComment(this.issue, new Comment(this.comment)).subscribe(
 			res => {
 				this.commentCreated.emit(res);
+				this.comment = ""
 			},
 			err => {
 				this.dialogue.open(ErrorDialogueComponent, {

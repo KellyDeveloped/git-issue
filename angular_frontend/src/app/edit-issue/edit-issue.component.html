@@ -1,4 +1,4 @@
-<div class="container flex-justify-center" *ngIf="issue">
+<div class="container flex-justify-center" *ngIf="issue && !showSpinner">
 	<mat-card style="width:1000px">
 		<mat-card-title>Edit Issue {{ issue?.id }}</mat-card-title>
 		<mat-card-content>
@@ -35,6 +35,6 @@
 		</mat-card-content>
 	</mat-card>
 </div>
-<div class="container flex-align-center flex-justify-center" style="width:100%; height:50%" *ngIf="!issue">
+<div class="container flex-align-center flex-justify-center" style="width:100%; height:50%" *ngIf="!issue || showSpinner">
 	<mat-spinner></mat-spinner>
 </div>

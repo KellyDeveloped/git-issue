@@ -95,6 +95,7 @@ export class IssueCacheService {
 			}
 			else { // If not 200, then it's created a new issue
 				this.issues.push(new CacheEntry(body.payload));
+				this.sortIssues();
 			}
 
 			subject.next(body);
@@ -108,6 +109,7 @@ export class IssueCacheService {
 
 		this.issueService.createIssue(issue).subscribe((res) => {
 			this.issues.push(new CacheEntry<Issue>(res.payload));
+			this.sortIssues();
 			subject.next(res);
 		}, err => {
 			subject.error(err);

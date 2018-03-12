@@ -145,7 +145,8 @@ class CommentListAPI(Resource):
         if (comment is None):
             raise BadRequest(f"No comment given.")
 
-        created_comment = handler.add_comment(id, Comment(comment))
+        comment = Comment(comment)
+        created_comment = handler.add_comment(id, comment)
         
         schema = CommentSchema()
         result = schema.dump(comment)

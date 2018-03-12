@@ -1,3 +1,4 @@
+<app-create-comment [issue]="issue" (commentCreated)="onCreate($event)"></app-create-comment>
 <mat-list *ngIf="comments">
 	<div *ngFor="let comment of comments; index as i">
 		<app-comment [comment]="comment"></app-comment>

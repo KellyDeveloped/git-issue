@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators, ValidationErrors, AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 
@@ -14,10 +15,12 @@ import { ErrorDialogueComponent } from '../error-dialogue/error-dialogue.compone
 })
 export class CreateIssueComponent {
 
-	issueForm: FormGroup
+	issueForm: FormGroup;
+	showSpinner = false;
 
 	constructor(private fb: FormBuilder,
 				private dialogue: MatDialog,
+				private router: Router,
 				private cacheService: IssueCacheService) {
 		this.issueForm = this.fb.group({
 			summary: new FormControl('', [Validators.required]),
@@ -48,11 +51,16 @@ export class CreateIssueComponent {
 		}
 
 		let issue = this.convertFormToIssue()
-		this.cacheService.createIssue(issue).subscribe((res) => { }, err => {
+		this.cacheService.createIssue(issue).subscribe((res) => {
+			this.router.navigate([`/issues/${res.payload.id}`])
+		}, err => {
 			this.dialogue.open(ErrorDialogueComponent, {
 				'data': err
 			});
+			this.showSpinner = false;
 		});
+
+		this.showSpinner = true;
 	}
 
 	emailOrEmpty(control: AbstractControl): ValidationErrors | null {

@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormControl, FormGroup, Validators, ValidationErrors, AbstractControl } from '@angular/forms';
 import { MatDialog } from '@angular/material';
 
@@ -23,8 +23,10 @@ export class EditIssueComponent implements OnInit {
 	statusIndicators: Array<string> = ["open", "closed"] // Constant defaults, safe assumption.
 
 	issueForm: FormGroup;
+	showSpinner = false;
 
 	constructor(private fb: FormBuilder,
+				private router: Router,
 				private dialogue: MatDialog,
 				private issueService: IssueService,
 				private cacheService: IssueCacheService,
@@ -72,7 +74,10 @@ export class EditIssueComponent implements OnInit {
 		}
 
 		let issue = this.convertFormToIssue()
-		this.cacheService.editIssue(issue).subscribe();
+		this.cacheService.editIssue(issue).subscribe(res => {
+			this.router.navigate([`/issues/${res.payload.id}`])
+		}, this.errorFunc);
+		this.showSpinner = true;
 	}
 
 	emailOrEmpty(control: AbstractControl): ValidationErrors | null {
@@ -83,17 +88,18 @@ export class EditIssueComponent implements OnInit {
 		return this.issue.subscribers.includes(this.currentUser);
 	}
 
+	errorFunc(err) {
+		this.dialogue.open(ErrorDialogueComponent, {
+			'data': err
+		});
+		this.issue = new Issue();
+		this.showSpinner = false;
+	};
+
 	ngOnInit(): void {
 		const id = this.route.snapshot.paramMap.get("id");
 
-		const errorFunc = err => {
-			this.dialogue.open(ErrorDialogueComponent, {
-				'data': err
-			});
-			this.issue = new Issue();
-		};
-
-		this.issueService.getStatusIndicators().subscribe(res => this.statusIndicators = res, errorFunc);
+		this.issueService.getStatusIndicators().subscribe(res => this.statusIndicators = res, this.errorFunc);
 		this.cacheService.getIssue(id).subscribe((res) => {
 			this.issue = res;
 			this.currentUser = this.cacheService.currentUser;
@@ -111,7 +117,7 @@ export class EditIssueComponent implements OnInit {
 			this.issueForm.get('subscribed').setValue(this.isCurrentUserSubscribed());
 
 			this.issueForm.get('status').setValue(this.issue.status);
-		}, errorFunc);
+		}, this.errorFunc);
 
 	}
 

@@ -36,3 +36,4 @@ __pycache__/
 venv/
 .idea/
 /Git-Issue/.pytest_cache/v/cache
+/.pytest_cache/v/cache

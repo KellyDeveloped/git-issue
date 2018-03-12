@@ -1,4 +1,4 @@
-<mat-card>
+<mat-card *ngIf="!showSpinner">
 	<mat-card-title>Create Issue</mat-card-title>
 	<mat-card-content>
 		<form [formGroup]="issueForm" class="container flex-column">
@@ -23,3 +23,6 @@
 		<button mat-button color="primary" type="submit" (click)="submit()" [disabled]="issueForm.invalid">Submit</button>
 	</mat-card-content>
 </mat-card>
+<div *ngIf="showSpinner" class="container flex-align-center flex-justify-center" style="width:100%; height:50%">
+	<mat-spinner></mat-spinner>
+</div>

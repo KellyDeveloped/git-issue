@@ -1,7 +1,7 @@
 from gituser import GitUser
 from utils import date_utils
 from utils.json_utils import JsonConvert
-import uuid
+import uuid as unique_identifier
 
 @JsonConvert.register
 class Comment(object):
@@ -14,8 +14,8 @@ class Comment(object):
         comment the New York's user would appear to be made before the Bangalore comment due
         to it being in an earlier timezone. """
 
-    def __init__(self, comment: str="", user: GitUser=None, date=None, id=None):
+    def __init__(self, comment: str="", user: GitUser=None, date=None, uuid=None):
         self.comment = comment
         self.user = user if user is not None else GitUser()
         self.date = date if date is not None else date_utils.get_date_now()
-        self.uuid = uuid if id is not None else uuid.uuid4().int
+        self.uuid = uuid if uuid is not None else unique_identifier.uuid4().int

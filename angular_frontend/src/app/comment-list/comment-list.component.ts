@@ -16,6 +16,20 @@ export class CommentListComponent implements OnInit {
 
 	constructor(private issueService: IssueService) { }
 
+	onCreate(e: Comment) {
+		this.comments.push(e);
+		this.comments.sort((a, b) => {
+			if (a.date == b.date) {
+				return 0;
+			}
+			else if (a.date > b.date) {
+				return 1;
+			}
+
+			return -1;
+		})
+	}
+
 	ngOnInit() {
 		this.issueService.getComments(this.issue, 1, 10).subscribe(res => { this.comments = res; });
 	}
