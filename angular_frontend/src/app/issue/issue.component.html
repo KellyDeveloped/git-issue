@@ -6,9 +6,9 @@
 	<mat-card-content>
 		<div class="flash"><strong>Description: </strong>{{ issue?.description }}</div>
 		<div class=flash><strong>Status: </strong> {{ issue?.status }}</div>
-		<div class=flash><strong>Assignee: </strong>{{ userToString(issue.assignee) }}</div>
+		<div class=flash><strong>Assignee: </strong>{{ userToString(issue?.assignee) }}</div>
 		<div class=flash>
-			<strong>Reporter: </strong>{{ userToString(issue.reporter) }}
+			<strong>Reporter: </strong>{{ userToString(issue?.reporter) }}
 		</div>
 		<strong>Subscribers: </strong>
 		<div class=flash>
