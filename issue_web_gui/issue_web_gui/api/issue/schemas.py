@@ -20,12 +20,12 @@ git_user_fields = api.model('User', GitUserSchema.user_fields)
 class IssueSchema(Schema):
 
     id = fields.Str(required=True)
-    date = fields.Str()
+    date = fields.Str(allow_none=True)
     summary = fields.Str(required=True)
-    description = fields.Str()
-    status = fields.Str()
-    assignee = fields.Nested(GitUserSchema)
-    reporter = fields.Nested(GitUserSchema)
+    description = fields.Str(allow_none=True)
+    status = fields.Str(allow_none=True)
+    assignee = fields.Nested(GitUserSchema, allow_none=True)
+    reporter = fields.Nested(GitUserSchema, allow_none=True)
     subscribers = fields.Nested(GitUserSchema, many=True)
 
     edit_fields = {

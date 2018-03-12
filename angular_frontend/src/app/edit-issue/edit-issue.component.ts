@@ -85,7 +85,10 @@ export class EditIssueComponent implements OnInit {
 	}
 
 	isCurrentUserSubscribed() {
-		this.issue.subscribers.map(i => i.email).includes(this.currentUser.email)
+		if (this.issue && this.currentUser) {
+			return this.issue.subscribers.map(i => i.email).includes(this.currentUser.email);
+		}
+		return false;
 	}
 
 	errorFunc(err) {

@@ -27,6 +27,7 @@ export class IssueCacheService {
 		if (issue === undefined) {
 			this.issueService.getIssue(id).subscribe(res => {
 				const entry = new CacheEntry(res.payload);
+				this.currentUser = res.user;
 
 				subject.next(res.payload);
 

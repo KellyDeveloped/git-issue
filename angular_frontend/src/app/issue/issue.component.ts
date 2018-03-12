@@ -17,7 +17,7 @@ export class IssueComponent implements OnInit {
 	editLink: string;
 
 	userToString(user: GitUser) {
-		if (!user.email) {
+		if (!user || !user.email) {
 			return "undefined"
 		}
 
