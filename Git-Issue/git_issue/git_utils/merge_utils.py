@@ -101,7 +101,11 @@ class CommentIndexResolutionTool(ResolutionTool):
         self.path = path
 
     def resolve(self):
-        self.index.store_index(self.path)
+        JsonConvert.ToFile(self.index, Path(self.path))
+        gm = GitManager()
+        repo = gm.obtain_repo()
+        repo.git.add(self.path)
+        repo.git.commit("-m", "comment-index-conflict-resolution")
 
 class DivergenceResolutionTool(ResolutionTool):
 
@@ -143,7 +147,7 @@ class CreateConflictResolver(ConflictResolver):
         self.tracker: Tracker = None
 
     def generate_resolution(self):
-        """ 
+        """
             Resolves conflicts by re-ordering the issues based on their creation date.
             The conflicts are resolved by giving the oldest issue the first conflicting issue ID.
 
@@ -203,7 +207,7 @@ class CreateConflictResolver(ConflictResolver):
 
 
 class CommentIndexConflictResolver(ConflictResolver):
-    
+
     def __init__(self):
         self.conflicts : [Index] = None
         self.path : Path = None
@@ -211,8 +215,9 @@ class CommentIndexConflictResolver(ConflictResolver):
     def generate_resolution(self):
         entries = []
 
-        for conflict in self.conflicts:
-            entries += conflict.entries
+        for info in self.conflicts:
+            for conflict in info.conflicts:
+                entries += conflict.entries
 
         entries = list(set(entries)) # remove duplicates by converting to set and back to list
         entries.sort(key=lambda x: x.date)

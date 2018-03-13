@@ -192,7 +192,7 @@ def test_produce_comment_index_resolver(comment_index_conflict, first_repo):
 
 def test_comment_index_resolver(comment_index_conflict, sorted_comment_index):
     resolver = CommentIndexConflictResolver()
-    resolver.conflicts = [conflict for conflict in comment_index_conflict.conflicts]
+    resolver.conflicts = [comment_index_conflict]
     resolver.path = "fake_path"
 
     result = resolver.generate_resolution()
@@ -251,6 +251,19 @@ def test_divergence_resolver(issue_1, issue_2, issue_3, monkeypatch):
 
     resolution = resolver.generate_resolution()
     assert [issue_3, expected] == resolution.resolved_issues
+
+def test_filter_manual_conflicts(issue_1, issue_2, first_repo):
+    create = ConflictInfo(None, [issue_1, issue_1, issue_2])
+
+    issue_1_json = JsonConvert.ToJSON(issue_1)
+    issue_1_copy = JsonConvert.FromJSON(issue_1_json)
+    issue_1_copy.uuid = issue_2.uuid
+
+    manual = ConflictInfo(None, [issue_1_copy, issue_1_copy, issue_1_copy])
+
+    result = GitMerge(first_repo).filter_manual_conflicts([create, manual])
+    assert [manual] == result
+
 
 def test_divergence_resolution(issue_3, first_repo, monkeypatch):
     os.chdir(first_repo.working_dir)
@@ -322,18 +335,18 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     first_entry = comment_handler.add_comment(first_comment)
 
     # Comment
-    # os.chdir(second_repo.working_dir)
-    # handler = IssueHandler()
-    # comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
-    # second_comment = Comment("second repo")
-    # second_entry = comment_handler.add_comment(second_comment)
-    #
-    # result = merge(second_repo)
-    # expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
-    #
-    # assert expected == result
-    # resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
-    # resolver.generate_resolution().resolve()
+    os.chdir(second_repo.working_dir)
+    handler = IssueHandler()
+    comment_handler = CommentHandler(handler.get_issue_path(issue_1), issue_1.id)
+    second_comment = Comment("second repo")
+    second_entry = comment_handler.add_comment(second_comment)
+
+    result = merge(second_repo)
+    expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
+
+    assert expected == result
+    resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
+    resolver.generate_resolution().resolve()
 
     # Edit conflict
     issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
