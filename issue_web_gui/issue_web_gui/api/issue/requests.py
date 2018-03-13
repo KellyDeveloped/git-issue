@@ -56,7 +56,7 @@ class IssueListAPI(Resource):
         issue.assignee = GitUser(json.get("assignee")) if json.get("assignee") is not None else None
         
         issue.subscribers.append(issue.reporter)
-        if issue.assignee is not None:
+        if issue.assignee is not None and issue.assignee not in issue.subscribers:
             issue.subscribers.append(issue.assignee)
         
         created_issue = handler.store_issue(issue, "create", generate_id=True)
