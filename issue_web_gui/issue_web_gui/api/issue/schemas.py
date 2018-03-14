@@ -1,9 +1,9 @@
 from marshmallow import Schema, fields, post_load
 from flask_restplus import fields as rfields
 from issue_web_gui.api import api
-from issue import Issue
+from git_issue.issue import Issue
 
-from gituser import GitUser
+from git_issue.gituser import GitUser
 
 class GitUserSchema(Schema):
     user = fields.Str()

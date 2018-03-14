@@ -1,27 +1,25 @@
 import shutil
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
+sys.path.append(str(Path(__file__).parent.joinpath("..")))
 
 import os
 
-from comment import Comment
-from comment.handler import CommentHandler
-from comment.index import Index, IndexEntry
-from git_manager import GitManager
-from git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
+from git_issue.comment import Comment
+from git_issue.comment.handler import CommentHandler
+from git_issue.comment.index import Index, IndexEntry
+from git_issue.git_manager import GitManager
+from git_issue.git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
     CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver, DivergenceResolutionTool
-from issue.tracker import UUIDTrack, Tracker
-from utils.json_utils import JsonConvert
-
-sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
+from git_issue.issue.tracker import UUIDTrack, Tracker
+from git_issue.utils.json_utils import JsonConvert
 
 import pytest
 
 import git
-from issue.handler import IssueHandler
-from gituser import GitUser
-from issue.issue import Issue
+from git_issue.issue.handler import IssueHandler
+from git_issue.gituser import GitUser
+from git_issue.issue.issue import Issue
 
 
 @pytest.fixture
@@ -128,7 +126,7 @@ def test_create_resolver(issue_1: Issue, issue_2: Issue, monkeypatch, first_repo
     issues = [ConflictInfo("Fake_Path", [issue_1, issue_2])]
 
     os.chdir(first_repo.working_dir)
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
 
     resolver = CreateConflictResolver()
     resolver.conflicts = issues
@@ -150,7 +148,7 @@ def test_create_resolution(issue_1: Issue, issue_2: Issue, monkeypatch, first_re
     issues = [issue_1, issue_2]
 
     os.chdir(first_repo.working_dir)
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
     monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     uuids = [UUIDTrack(issue_1.uuid, issue_1.id), UUIDTrack(issue_2.uuid, issue_2.id)]
@@ -284,7 +282,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     issue_2_copy = JsonConvert.FromJSON(issue_2_json)
     issue_2_copy.summary = "Edited Summary"
 
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
     monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     def merge(repo):

@@ -2,6 +2,7 @@
 
 import argparse
 import issue.handler as issue_handler
+from git_manager import GitManager
 from issue.issue import Issue
 from gituser import GitUser
 from comment.comment import Comment
@@ -29,6 +30,8 @@ showParser = subparser.add_parser('show', help="""Show the information for a giv
 listParser = subparser.add_parser('list', help='List known issues.')
 subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
 unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
+
+pushParser = subparser.add_parser('push', help='Push the issue branch to its remote.')
 
 # status shorthands
 openIssueParser = subparser.add_parser('open', help='Sets the status of the given issue to "Open"')
@@ -132,6 +135,16 @@ def list(args):
     for i in issues:
         issue_handler.display_issue(i)
         print()
+
+
+def push(args):
+    gm = GitManager()
+    gm.push()
+
+
+def pull(args):
+    gm = GitManager()
+    gm.pull()
 
 
 def subscribe(args):

@@ -1,10 +1,9 @@
-import comment.index as index
+import git_issue.comment.index as index
 from pathlib import Path
-from comment.comment import Comment
-from comment.index import IndexEntry
-from utils.json_utils import JsonConvert
-from git_manager import GitManager
-from issue.issue import Issue
+from git_issue.comment.comment import Comment
+from git_issue.comment.index import IndexEntry
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_manager import GitManager
 
 class CommentHandler(object):
     """description of class"""

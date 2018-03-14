@@ -266,4 +266,11 @@ class GitManager(object):
 
     @staticmethod
     def obtain_repo():
-        return git.Repo(os.getcwd(), search_parent_directories=True)
+        return RepoHandler.obtain_repo()
+
+
+class RepoHandler(object):
+
+    @staticmethod
+    def obtain_repo():
+        return git.Repo(str(Path.cwd()), search_parent_directories=True)

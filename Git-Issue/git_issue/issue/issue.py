@@ -1,7 +1,7 @@
 import uuid
-from gituser import GitUser
-from utils.json_utils import JsonConvert
-from utils import date_utils
+from git_issue.gituser import GitUser
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.utils import date_utils
 
 
 @JsonConvert.register

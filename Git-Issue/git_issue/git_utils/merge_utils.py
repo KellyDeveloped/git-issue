@@ -6,12 +6,12 @@ from abc import ABC, abstractmethod
 from git import Repo
 from pathlib import Path
 
-from git_manager import GitManager
-from utils.json_utils import JsonConvert
-from issue.issue import Issue
-from issue.handler import IssueHandler
-from issue.tracker import Tracker, UUIDTrack
-from comment.index import Index
+from git_issue.git_manager import GitManager
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.issue.issue import Issue
+from git_issue.issue.handler import IssueHandler
+from git_issue.issue.tracker import Tracker, UUIDTrack
+from git_issue.comment.index import Index
 
 
 class ConflictType(Enum):

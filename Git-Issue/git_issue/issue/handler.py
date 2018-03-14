@@ -1,9 +1,9 @@
 from pathlib import Path
-from git_manager import GitManager
-from issue.issue import Issue
-from utils.json_utils import JsonConvert
-from issue.tracker import Tracker
-from comment.handler import CommentHandler
+from git_issue.git_manager import GitManager
+from git_issue.issue.issue import Issue
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.issue.tracker import Tracker
+from git_issue.comment.handler import CommentHandler
 
 
 class IssueHandler(object):

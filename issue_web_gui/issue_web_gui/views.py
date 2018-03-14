@@ -2,9 +2,9 @@
 Routes and views for the flask application.
 """
 
-import issue.handler as handler
-from issue import Issue
-from gituser import GitUser
+import git_issue.issue.handler as handler
+from git_issue.issue import Issue
+from git_issue.gituser import GitUser
 from datetime import datetime
 from flask import render_template, request
 from issue_web_gui import app

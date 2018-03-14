@@ -15,10 +15,10 @@ import hashlib
 
 from .schemas import IssueSchema, issue_create_fields, issue_edit_fields, GitUserSchema, CommentSchema, comment_fields, to_payload, IssueListSchema
 
-import issue.handler as handler
-from issue import Issue, status_indicators
-from comment import Comment
-from gituser import GitUser
+import git_issue.issue.handler as handler
+from git_issue.issue import Issue, status_indicators
+from git_issue.comment import Comment
+from git_issue.gituser import GitUser
 
 page_args = {
     'page': fields.Integer(),
