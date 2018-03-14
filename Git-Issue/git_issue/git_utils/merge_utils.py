@@ -5,6 +5,7 @@ from abc import ABC, abstractmethod
 
 from git import Repo
 from pathlib import Path
+from typing import List
 
 from git_issue.git_manager import GitManager
 from git_issue.utils.json_utils import JsonConvert
@@ -91,8 +92,6 @@ class CreateResolutionTool(ResolutionTool):
         for path in paths:
             repo.git.add(path)
 
-        repo.git.commit("-m", "create_conflict_resolution")
-
 
 class CommentIndexResolutionTool(ResolutionTool):
     
@@ -105,7 +104,6 @@ class CommentIndexResolutionTool(ResolutionTool):
         gm = GitManager()
         repo = gm.obtain_repo()
         repo.git.add(self.path)
-        repo.git.commit("-m", "comment-index-conflict-resolution")
 
 class DivergenceResolutionTool(ResolutionTool):
 
@@ -126,8 +124,6 @@ class DivergenceResolutionTool(ResolutionTool):
         repo = gm.obtain_repo()
         for path in paths:
             repo.git.add(path)
-
-        repo.git.commit("-m", "create-edit-divergence-conflict-resolution")
 
 class ConflictResolver(ABC):
 
@@ -209,21 +205,19 @@ class CreateConflictResolver(ConflictResolver):
 class CommentIndexConflictResolver(ConflictResolver):
 
     def __init__(self):
-        self.conflicts : [Index] = None
-        self.path : Path = None
+        self.conflict_info: ConflictInfo = None
 
     def generate_resolution(self):
         entries = []
 
-        for info in self.conflicts:
-            for conflict in info.conflicts:
-                entries += conflict.entries
+        for conflict in self.conflict_info.conflicts:
+            entries += conflict.entries
 
         entries = list(set(entries)) # remove duplicates by converting to set and back to list
         entries.sort(key=lambda x: x.date)
         index = Index(entries)
 
-        return CommentIndexResolutionTool(index, self.path)
+        return CommentIndexResolutionTool(index, self.conflict_info.path)
 
 
 class DivergenceConflictResolver(ConflictResolver):
@@ -231,7 +225,7 @@ class DivergenceConflictResolver(ConflictResolver):
     def __init__(self):
         self.diverged_issues = []
         self.resolved_conflicts: [Issue] = []
-        self.resolved_tracker: Tracker = None
+        self.resolved_tracker: Tracker
 
     def _get_edit_resolution(self, diverged: Issue, current: Issue) -> Issue:
         print(f"Issue with ID {diverged.id} and UUID {diverged.uuid} has been changed to {current.id} in a previous "
@@ -333,6 +327,9 @@ class GitMerge(object):
 
         return [conflict for conflict in conflicts if conflict.type is type]
 
+    def has_conflicts(self) -> bool:
+        return self.repo.index.unmerged_blobs() != {}
+
     def parse_unmerged_conflicts(self) -> [ConflictInfo]:
         unmerged_blobs = self.repo.index.unmerged_blobs()
         unmerged: [ConflictInfo] = []
@@ -361,11 +358,16 @@ class GitMerge(object):
         resolver.tracker = Tracker(len(uuids), uuids)
         return resolver
 
-    def produce_comment_index_resolver(self, path: Path, conflicts: [ConflictInfo] = None) -> ConflictResolver:
-        resolver = CommentIndexConflictResolver()
-        resolver.conflicts = self._get_conflicts_of_type(ConflictType.COMMENT_INDEX, conflicts)
-        resolver.path = path
-        return resolver
+    def produce_comment_index_resolvers(self, conflicts: [ConflictInfo] = None) -> List[ConflictResolver]:
+        comment_conflicts = self._get_conflicts_of_type(ConflictType.COMMENT_INDEX, conflicts)
+        resolvers: List[ConflictResolver] = []
+
+        for conflict in comment_conflicts:
+            resolver = CommentIndexConflictResolver()
+            resolver.conflict_info = conflict
+            resolvers.append(resolver)
+
+        return resolvers
 
     def produce_create_edit_divergence_resolver(self, conflicts: [ConflictInfo],
                                                 resolved_issues: [Issue],
