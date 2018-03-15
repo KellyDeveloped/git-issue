@@ -191,7 +191,8 @@ class GitManager(object):
 
     def add_to_index(self, paths: [str]):
         repo = self.obtain_repo()
-        repo.index.add(paths)
+        for path in paths:
+            repo.git.add(path)
 
     def push(self):
         repo = self.obtain_repo()

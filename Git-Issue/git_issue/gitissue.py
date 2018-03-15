@@ -8,6 +8,8 @@ from gituser import GitUser
 from comment.comment import Comment
 
 # Arguments start here
+from git_issue.git_utils.sync_utils import GitSynchronizer
+
 parser = argparse.ArgumentParser(prog='git issue')
 
 
@@ -31,7 +33,10 @@ listParser = subparser.add_parser('list', help='List known issues.')
 subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
 unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
 
+# Synchronisation parsers
 pushParser = subparser.add_parser('push', help='Push the issue branch to its remote.')
+pullParser = subparser.add_parser('pull', help='Pull from remote issue branch.')
+mergeParser = subparser.add_parser('merge', help='Attempts to resolve any merge conflicts that have arose.')
 
 # status shorthands
 openIssueParser = subparser.add_parser('open', help='Sets the status of the given issue to "Open"')
@@ -138,13 +143,15 @@ def list(args):
 
 
 def push(args):
-    gm = GitManager()
-    gm.push()
-
+    sync = GitSynchronizer()
+    sync.push()
 
 def pull(args):
-    gm = GitManager()
-    gm.pull()
+    sync = GitSynchronizer()
+    sync.pull(args.with_merge)
+
+def merge(args):
+    pass
 
 
 def subscribe(args):
@@ -188,6 +195,14 @@ openIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Open"))
 closeIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Closed"))
 inProgressParser.set_defaults(func=lambda x: change_status(x.issue[0], "In Progress"))
 
+pullParser.add_argument('--with-merge', '-m', help='Attempt to resolve merge conflicts that arise', action='store_true')
+pullParser.set_defaults(func=pull)
+pushParser.set_defaults(func=push)
+mergeParser.set_defaults(func=merge)
+
 args = parser.parse_args()
-args.func(args)
+if args.func:
+    args.func(args)
+else:
+    print("Command not recognised. Try --help or -h to view a list of accepted commands.")
 # Arguments end here

@@ -81,7 +81,7 @@ class CreateResolutionTool(ResolutionTool):
 
         gm.load_issue_branch()
         for issue in self.resolved_issues:
-            handler = IssueHandler()
+            handler = IssueHandler(self.tracker)
             file_path = handler.get_issue_path(issue)
             JsonConvert.ToFile(issue, file_path)
             paths.append(str(file_path))
@@ -164,7 +164,7 @@ class CreateConflictResolver(ConflictResolver):
             tracker = Tracker(self.tracker.issue_count, self.tracker.tracked_uuids.copy())
 
         complete = False
-        handler = IssueHandler()
+        handler = IssueHandler(tracker)
         ids = [issue.id for issue in conflicts]
 
         while not complete:
@@ -351,6 +351,8 @@ class GitMerge(object):
     def produce_create_resolver(self, conflicts: [ConflictInfo] = None) -> ConflictResolver:
         resolver = CreateConflictResolver()
         resolver.conflicts = self._get_conflicts_of_type(ConflictType.CREATE, conflicts)
+
+        uuids = []
 
         for info in resolver.conflicts:
             uuids = [UUIDTrack(issue.uuid, issue.id) for issue in info.conflicts]
