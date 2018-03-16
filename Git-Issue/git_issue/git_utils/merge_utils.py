@@ -302,13 +302,14 @@ class DivergenceConflictResolver(ConflictResolver):
             else:
                 raise DivergenceMatchMissingError(stage_2, stage_3, "Failed to discern the stage that is diverged")
 
-        print("One or more create-edit divergencies have been identified. This is when an issue on "\
-            "one branch has been edited, after it has been resolved as a create conflict "\
-            "on another branch that is being merged with the current branch.")
+        if len(matching_issues) > 0:
+            print("One or more create-edit divergencies have been identified. This is when an issue on "\
+                "one branch has been edited, after it has been resolved as a create conflict "\
+                "on another branch that is being merged with the current branch.")
 
-        for diverged, match in matching_issues:
-            resolved = self._get_edit_resolution(diverged, match)
-            resolved_issues.append(resolved)
+            for diverged, match in matching_issues:
+                resolved = self._get_edit_resolution(diverged, match)
+                resolved_issues.append(resolved)
 
         resolution = DivergenceResolutionTool(resolved_issues)
 

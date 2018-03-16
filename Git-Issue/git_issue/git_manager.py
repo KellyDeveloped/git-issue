@@ -210,7 +210,7 @@ class GitManager(object):
         if new_branch:
             repo.index.commit(commit_message, parent_commits=None)
         else:
-            repo.index.commit(commit_message)
+            repo.git.commit("-m", commit_message)
 
     def commit_and_push(self, cmd, id):
         repo = self.obtain_repo()

@@ -1,5 +1,10 @@
 #!/usr/bin/env python
 
+import sys
+sys.path.append(f"{__file__}/../..")
+
+from git_issue.git_utils.merge_utils import GitMerge
+
 import argparse
 import issue.handler as issue_handler
 from git_manager import GitManager
@@ -146,12 +151,15 @@ def push(args):
     sync = GitSynchronizer()
     sync.push()
 
+
 def pull(args):
     sync = GitSynchronizer()
     sync.pull(args.with_merge)
 
+
 def merge(args):
-    pass
+    sync = GitSynchronizer()
+    sync.merge(GitMerge(sync.repo))
 
 
 def subscribe(args):
