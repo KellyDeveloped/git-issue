@@ -9,6 +9,7 @@ from typing import List
 
 from git_issue.git_manager import GitManager
 from git_issue.utils.json_utils import JsonConvert
+import git_issue.issue as issue
 from git_issue.issue.issue import Issue
 from git_issue.issue.handler import IssueHandler
 from git_issue.issue.tracker import Tracker, UUIDTrack
@@ -174,7 +175,7 @@ class CreateConflictResolver(ConflictResolver):
                 next_id = handler.next_issue_id(issue)
 
                 if next_id not in ids:
-                    if handler.does_issue_exist(next_id):
+                    if handler.does_issue_exist(next_id, should_unload=False):
                         missing = handler.get_issue_from_issue_id(next_id)
                         to_add.append(missing)
 

@@ -226,7 +226,8 @@ class GitManager(object):
                              should_push=False,
                              generate_index_paths: Callable[[], list] = None,
                              commit_type: str = None,
-                             commit_id: str = None):
+                             commit_id: str = None,
+                             should_unload=True):
         """
             This executes the typical git workflow:
                 Pull origin/issue;
@@ -258,7 +259,8 @@ class GitManager(object):
             self.add_to_index(paths)
             self.commit(commit_type, commit_id)
 
-        self.unload_issue_branch()
+        #if should_unload:
+        #    self.unload_issue_branch()
 
         #if should_push:
         #    self.push()

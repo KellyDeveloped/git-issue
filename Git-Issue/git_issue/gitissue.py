@@ -6,11 +6,11 @@ sys.path.append(f"{__file__}/../..")
 from git_issue.git_utils.merge_utils import GitMerge
 
 import argparse
-import issue.handler as issue_handler
-from git_manager import GitManager
-from issue.issue import Issue
-from gituser import GitUser
-from comment.comment import Comment
+import git_issue.issue.handler as issue_handler
+from git_issue.git_manager import GitManager
+from git_issue.issue.issue import Issue
+from git_issue.gituser import GitUser
+from git_issue.comment.comment import Comment
 
 # Arguments start here
 from git_issue.git_utils.sync_utils import GitSynchronizer
@@ -148,18 +148,35 @@ def list(args):
 
 
 def push(args):
+    gm = GitManager()
+    gm.load_issue_branch()
     sync = GitSynchronizer()
     sync.push()
+    try:
+        gm.unload_issue_branch()
+    except:
+        print ("Couldn't unload issue branch.")
 
 
 def pull(args):
+    gm = GitManager()
+    gm.load_issue_branch()
     sync = GitSynchronizer()
     sync.pull(args.with_merge)
-
-
+    try:
+        gm.unload_issue_branch()
+    except:
+        print ("Couldn't unload issue branch.")
+        
 def merge(args):
+    gm = GitManager()
+    gm.load_issue_branch()
     sync = GitSynchronizer()
     sync.merge(GitMerge(sync.repo))
+    try:
+        gm.unload_issue_branch()
+    except:
+        print ("Couldn't unload issue branch.")
 
 
 def subscribe(args):

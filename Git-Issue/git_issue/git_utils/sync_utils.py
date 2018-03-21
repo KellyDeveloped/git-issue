@@ -14,7 +14,7 @@ class GitSynchronizer(object):
     def push(self):
         try:
             print("Pushing to remote branch.")
-            self.repo.git.pull()
+            self.repo.git.push()
             print("Successfully pushed to remote branch.")
         except GitCommandError as e:
             print("Failed to push to remote issue branch. Refer to the error below for more details")

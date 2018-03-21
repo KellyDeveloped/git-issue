@@ -89,9 +89,9 @@ class IssueHandler(object):
         for s in issue.subscribers:
             print (f"\t{s.user}, {s.email}")
 
-    def does_issue_exist(self, id: str):
+    def does_issue_exist(self, id: str, should_unload=True):
         gm = GitManager()
-        return gm.perform_git_workflow(lambda: _generate_issue_file_path(id).exists())
+        return gm.perform_git_workflow(lambda: _generate_issue_file_path(id).exists(), should_unload)
 
 
 def _increment_issue_count():

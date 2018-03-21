@@ -5,14 +5,15 @@
     <ProjectGuid>e257338e-16d4-44ab-bf14-d9b17680cca1</ProjectGuid>
     <ProjectHome>.</ProjectHome>
     <StartupFile>git_issue/gitissue.py</StartupFile>
-    <SearchPath>git_issue</SearchPath>
-    <WorkingDirectory>.</WorkingDirectory>
+    <SearchPath>
+    </SearchPath>
+    <WorkingDirectory>C:\Users\Liam\source\repos\git-issue-playground\testbench-one</WorkingDirectory>
     <OutputPath>.</OutputPath>
     <Name>Git-Issue</Name>
     <RootNamespace>Git-Issue</RootNamespace>
     <IsWindowsApplication>False</IsWindowsApplication>
     <LaunchProvider>Standard Python launcher</LaunchProvider>
-    <CommandLineArguments>show</CommandLineArguments>
+    <CommandLineArguments>pull --with-merge</CommandLineArguments>
     <EnableNativeCodeDebugging>False</EnableNativeCodeDebugging>
     <InterpreterId>MSBuild|env|$(MSBuildProjectFullPath)</InterpreterId>
   </PropertyGroup>
