@@ -172,10 +172,13 @@ class CreateConflictResolver(ConflictResolver):
             to_add = []
 
             for issue in conflicts:
-                next_id = handler.next_issue_id(issue)
+                next_id = handler.next_issue_id(issue.id)
+                while next_id in ids:
+                    next_id = handler.next_issue_id(next_id)
+
 
                 if next_id not in ids:
-                    if handler.does_issue_exist(next_id, should_unload=False):
+                    if handler.does_issue_exist(next_id):
                         missing = handler.get_issue_from_issue_id(next_id)
                         to_add.append(missing)
 
@@ -191,13 +194,13 @@ class CreateConflictResolver(ConflictResolver):
         sorted_ids = list(set(ids))
         sorted_ids.sort()
 
-        assert len(sorted_ids) == len(conflicts)
+        assert len(sorted_ids) >= len(conflicts)
 
         index = 0
-        for id in sorted_ids:
-            issue = conflicts[index]
-            issue.id = id
-            tracker.track_or_update_uuid(issue.uuid, id)
+        for issue in conflicts:
+            new_id = sorted_ids[index]
+            issue.id = new_id
+            tracker.track_or_update_uuid(issue.uuid, new_id)
             index += 1
 
         return CreateResolutionTool(conflicts, tracker)
@@ -353,13 +356,21 @@ class GitMerge(object):
     def produce_create_resolver(self, conflicts: [ConflictInfo] = None) -> ConflictResolver:
         resolver = CreateConflictResolver()
         resolver.conflicts = self._get_conflicts_of_type(ConflictType.CREATE, conflicts)
+        trackers = self._get_conflicts_of_type(ConflictType.TRACKER, conflicts)
 
-        uuids = []
+        # uuids = []
 
-        for info in resolver.conflicts:
-            uuids = [UUIDTrack(issue.uuid, issue.id) for issue in info.conflicts]
+        tracking = []
+        for conflict in trackers:
+            for tracker in conflict.conflicts:
+                for track in tracker.tracked_uuids:
+                    if track not in tracking:
+                        tracking.append(track)
 
-        resolver.tracker = Tracker(len(uuids), uuids)
+        # for info in resolver.conflicts:
+        #     uuids = [UUIDTrack(issue.uuid, issue.id) for issue in info.conflicts]
+
+        resolver.tracker = Tracker(len(tracking), tracking)
         return resolver
 
     def produce_comment_index_resolvers(self, conflicts: [ConflictInfo] = None) -> List[ConflictResolver]:

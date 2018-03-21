@@ -7,6 +7,7 @@ from git_issue.git_utils.merge_utils import GitMerge
 
 import argparse
 import git_issue.issue.handler as issue_handler
+from git_issue.issue.handler import IssueHandler
 from git_issue.git_manager import GitManager
 from git_issue.issue.issue import Issue
 from git_issue.gituser import GitUser
@@ -86,11 +87,12 @@ def create(args):
 
 
 def edit(args):
-    if (not issue_handler.does_issue_exist(args.issue)):
+    handler = IssueHandler()
+    if not handler.does_issue_exist(args.issue):
         print("Error: Issue does not exist")
         return
 
-    issue = issue_handler.get_issue(args.issue)
+    issue = handler.get_issue_from_issue_id(args.issue)
 
     if (issue == None):
         print("There was a problem ")
@@ -105,7 +107,7 @@ def edit(args):
     issue.status = args.status if args.status != None else issue.status
 
     print()
-    confirm_operation(issue, lambda: issue_handler.store_issue(issue, "edit"))
+    confirm_operation(issue, lambda: handler.store_issue(issue, "edit"))
 
 
 def change_status(issue_id, status):
@@ -148,35 +150,30 @@ def list(args):
 
 
 def push(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.push()
+        sync = None
     gm = GitManager()
-    gm.load_issue_branch()
-    sync = GitSynchronizer()
-    sync.push()
-    try:
-        gm.unload_issue_branch()
-    except:
-        print ("Couldn't unload issue branch.")
+    gm.perform_git_workflow(action)
 
 
 def pull(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.pull(args.with_merge)
+        sync = None
     gm = GitManager()
-    gm.load_issue_branch()
-    sync = GitSynchronizer()
-    sync.pull(args.with_merge)
-    try:
-        gm.unload_issue_branch()
-    except:
-        print ("Couldn't unload issue branch.")
-        
+    gm.perform_git_workflow(action)
+
 def merge(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.merge(GitMerge(sync.repo))
+        sync = None
     gm = GitManager()
-    gm.load_issue_branch()
-    sync = GitSynchronizer()
-    sync.merge(GitMerge(sync.repo))
-    try:
-        gm.unload_issue_branch()
-    except:
-        print ("Couldn't unload issue branch.")
+    gm.perform_git_workflow(action)
+
 
 
 def subscribe(args):

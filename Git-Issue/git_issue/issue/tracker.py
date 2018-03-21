@@ -68,3 +68,9 @@ class Tracker(object):
 
         return tracker
 
+    def __eq__(self, value):
+        if type(value) is Tracker:
+            return self.tracked_uuids == value.tracked_uuids and self.issue_count == value.issue_count
+
+        return False
+

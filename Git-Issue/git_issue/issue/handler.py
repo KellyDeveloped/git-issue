@@ -15,8 +15,8 @@ class IssueHandler(object):
         num = self.tracker.issue_count + 1 if count is None else count
         return "{}-{}".format(self.tracker.ISSUE_IDENTIFIER, num)
 
-    def next_issue_id(self, issue: Issue) -> str:
-        num = int(issue.id.replace(f"{self.tracker.ISSUE_IDENTIFIER}-", "")) + 1
+    def next_issue_id(self, issue_id: str) -> str:
+        num = int(issue_id.replace(f"{self.tracker.ISSUE_IDENTIFIER}-", "")) + 1
         return self.generate_issue_id(num)
 
     @staticmethod
@@ -57,10 +57,20 @@ class IssueHandler(object):
 
     def get_issue_from_issue_id(self, id):
         gm = GitManager()
-        try:    
-            return gm.perform_git_workflow(lambda: JsonConvert.FromFile(_generate_issue_file_path(id)))
+        is_loaded = gm.is_inside_branch()
+
+        if not is_loaded:
+            gm.load_issue_branch()
+
+        try:
+            file = JsonConvert.FromFile(_generate_issue_file_path(id))
         except FileNotFoundError:
             return None
+
+        if not is_loaded:
+            gm.unload_issue_branch()
+
+        return file
 
     def display_issue(issue, with_comments=False):
         print (f"Issue ID:\t{issue.id}")
@@ -89,9 +99,20 @@ class IssueHandler(object):
         for s in issue.subscribers:
             print (f"\t{s.user}, {s.email}")
 
-    def does_issue_exist(self, id: str, should_unload=True):
+    def does_issue_exist(self, id: str):
         gm = GitManager()
-        return gm.perform_git_workflow(lambda: _generate_issue_file_path(id).exists(), should_unload)
+
+        is_loaded = gm.is_inside_branch()
+        if not is_loaded:
+            gm.load_issue_branch()
+
+        exists = _generate_issue_file_path(id).exists()
+
+        if not is_loaded:
+            gm.unload_issue_branch()
+
+        return exists
+
 
 
 def _increment_issue_count():

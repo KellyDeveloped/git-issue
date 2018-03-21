@@ -64,3 +64,8 @@ class GitSynchronizer(object):
 
             for conflict in manual_conflicts:
                 print(f"\t{conflict.path}")
+
+            gm = GitManager()
+            if gm.is_worktree():
+                print("Exiting program to prevent branch unloading. This would cause loss of resolved conflicts.")
+                exit()

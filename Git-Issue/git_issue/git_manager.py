@@ -50,7 +50,7 @@ class GitManager(object):
     @classmethod
     def is_inside_branch(cls):
         repo = cls.obtain_repo()
-        return repo.active_branch == cls.ISSUE_BRANCH
+        return repo.active_branch.name == cls.ISSUE_BRANCH
 
     def get_choice_from_user(self, confirm_msg) -> bool:
         create = input(confirm_msg).capitalize()
@@ -259,8 +259,8 @@ class GitManager(object):
             self.add_to_index(paths)
             self.commit(commit_type, commit_id)
 
-        #if should_unload:
-        #    self.unload_issue_branch()
+        if should_unload:
+           self.unload_issue_branch()
 
         #if should_push:
         #    self.push()
