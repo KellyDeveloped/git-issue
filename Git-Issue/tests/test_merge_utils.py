@@ -175,14 +175,15 @@ def test_produce_create_resolver(issue_1: Issue, issue_2: Issue, first_repo):
     assert conflict.type == ConflictType.CREATE
 
     merger = GitMerge(first_repo)
-    result = merger.produce_create_resolver([conflict])
+    tracks = [UUIDTrack(issue.uuid, issue.id) for issue in conflict.conflicts]
+    result = merger.produce_create_resolver([conflict,
+                                             ConflictInfo("Another fake path", [Tracker(len(tracks), tracks)])])
 
     assert 1 == len(result.conflicts) and 2 == len(result.conflicts[0].conflicts)
     assert 2 == len(result.tracker.tracked_uuids) and 2 == result.tracker.issue_count
 
     assert conflict == result.conflicts[0]
-    assert [UUIDTrack(issue.uuid, issue.id) for issue in conflict.conflicts]\
-        == result.tracker.tracked_uuids
+    assert tracks == result.tracker.tracked_uuids
 
 def test_produce_comment_index_resolver(comment_index_conflict, first_repo):
     merger = GitMerge(first_repo)
