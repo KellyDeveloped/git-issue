@@ -94,7 +94,7 @@ def test_repo(tmpdir):
     return repo
 
 def test_tracker_increment(tracker):
-    handler._increment_issue_count()
+    tracker.increment_issue_count()
     assert tracker.issue_count == 11
 
 def test_id_generation(tracker):

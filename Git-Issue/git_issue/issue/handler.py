@@ -23,8 +23,9 @@ class IssueHandler(object):
     def _generate_issue_folder_path(id):
         dir = Path.cwd()
 
-        # if GitManager.is_worktree():
-        #     dir = dir.joinpath("issue")
+        gm = GitManager()
+        if dir.parts[-1] != "issue" and gm.is_worktree():
+            dir = dir.joinpath("issue")
 
         return dir.joinpath(id)
 
@@ -126,14 +127,6 @@ class IssueHandler(object):
             return [JsonConvert.FromFile(_generate_issue_file_path(i.parts[-1])) for i in range], len(dirs)
 
         return gm.perform_git_workflow(action)
-
-
-
-def _increment_issue_count():
-    tracker = Tracker.obtain_tracker()
-    tracker.increment_issue_count()
-    tracker.store_tracker()
-
 
 def _generate_issue_folder_path(id):
     dir = Path.cwd()
