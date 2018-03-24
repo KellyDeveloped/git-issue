@@ -177,29 +177,6 @@ def get_all_issues():
 
     return gm.perform_git_workflow(action)
 
-def store_issue(issue, cmd, generate_id=False):
-    gen_paths = lambda : [str(_generate_issue_file_path(issue.id))]
-    
-    def action():
-        if (generate_id):
-            issue.id = generate_issue_id()
-            _increment_issue_count()
-
-        JsonConvert.ToFile(issue, _generate_issue_file_path(issue.id))
-        tracker = Tracker.obtain_tracker()
-        tracker.track_or_update_uuid(issue.uuid, issue.id)
-        tracker.store_tracker()
-        return issue
-
-    gm = GitManager()
-    return gm.perform_git_workflow(action, True, gen_paths, cmd, issue.id)
-
-
-def add_comment(issue_id, comment):
-    handler = CommentHandler(_generate_issue_folder_path(issue_id), issue_id)
-    return handler.add_comment(comment)
-
-
 def get_comment_range(issue_id, range: int, start_pos: int = 0):
     gm = GitManager()
 
@@ -208,32 +185,3 @@ def get_comment_range(issue_id, range: int, start_pos: int = 0):
         return handler.get_comment_range(range, start_pos)
 
     return gm.perform_git_workflow(action)
-
-
-
-def display_issue(issue, with_comments=False):
-    print (f"Issue ID:\t{issue.id}")
-    print (f"Summary:\t{issue.summary}")
-    print (f"Description:\t{issue.description}")
-    
-    if with_comments:
-        print ("Comments:")
-        for c in get_comments:
-            print (f"\tUser: {c.user}\tTimestamp:{c.date}")
-            print (f'\t"{c.comment}"')
-
-    print (f"Status:\t\t{issue.status}")
-    
-    if issue.assignee != None:
-        print (f"Assignee:\t{issue.assignee.user}, {issue.assignee.email}")
-    else:
-        print ("Assignee:\tUnassigned")
-
-    if issue.reporter != None:
-        print (f"Reporter:\t{issue.reporter.user}, {issue.reporter.email}")
-    else:
-        print ("Reporter:\tUnassigned")
-
-    print ("Subscribers:")
-    for s in issue.subscribers:
-        print (f"\t{s.user}, {s.email}")

@@ -2,6 +2,9 @@
 Routes and views for the flask application.
 """
 from flask_restplus import Resource
+
+from git_issue.comment.handler import CommentHandler
+from git_issue.issue.handler import IssueHandler
 from issue_web_gui.api import api
 from flask import render_template, request, abort
 from flask_restplus_marshmallow import Schema
@@ -69,7 +72,8 @@ class IssueListAPI(Resource):
         issue.subscribers.append(issue.reporter)
         if issue.assignee is not None and issue.assignee not in issue.subscribers:
             issue.subscribers.append(issue.assignee)
-        
+
+        handler = IssueHandler()
         created_issue = handler.store_issue(issue, "create", generate_id=True)
         result = to_payload(GitUser(), issue, IssueSchema)
 
@@ -109,6 +113,7 @@ class IssueAPI(Resource):
         httpStatus: HTTPStatus = None
         headers = {}
 
+        handler = IssueHandler()
         if (not handler.does_issue_exist(id)):
             issue = handler.store_issue(updated_issue, "create", True)
 
@@ -170,7 +175,9 @@ class CommentListAPI(Resource):
             raise BadRequest(f"No comment given.")
 
         comment = Comment(comment)
-        created_comment = handler.add_comment(id, comment)
+        ih = IssueHandler()
+        handler = CommentHandler(ih.get_issue_path(Issue(id)), id)
+        created_comment = handler.add_comment(comment)
         
         schema = CommentSchema()
         result = schema.dump(comment)

@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 
 import sys
+
+
 sys.path.append(f"{__file__}/../..")
 
 from git_issue.git_utils.merge_utils import GitMerge
@@ -12,6 +14,7 @@ from git_issue.git_manager import GitManager
 from git_issue.issue.issue import Issue
 from git_issue.gituser import GitUser
 from git_issue.comment.comment import Comment
+from git_issue.comment.handler import CommentHandler
 
 # Arguments start here
 from git_issue.git_utils.sync_utils import GitSynchronizer
@@ -56,7 +59,8 @@ inProgressParser.add_argument("issue", nargs=1)
 
 def confirm_operation(issue, operation):
     print("Operation will result in the following issue:\n")
-    issue_handler.display_issue(issue)
+    handler = IssueHandler()
+    handler.display_issue(issue)
     create = input(f"\nConfirm (Y/N): ").capitalize()
 
     while create != "Y" and create != "YES" and create != "N" and create != "NO":
@@ -80,7 +84,8 @@ def create(args):
     issue.subscribers.append(GitUser())
 
     def operation():
-        new_issue = issue_handler.store_issue(issue, "creation", True)
+        handler = IssueHandler()
+        new_issue = handler.store_issue(issue, "creation", True)
         print(f"ID of newly created issue: {new_issue.id}")
 
     confirm_operation(issue, operation)
@@ -98,7 +103,7 @@ def edit(args):
         print("There was a problem ")
 
     print("Issue before editing:")
-    issue_handler.display_issue(issue)
+    handler.display_issue(issue)
 
     issue.summary = args.summary if args.summary != None else issue.summary
     issue.description = args.description if args.description != None else issue.description
@@ -126,17 +131,20 @@ def change_status(issue_id, status):
 
 def comment(args):
     comment = Comment(args.comment)
-    issue_handler.add_comment(args.issue, comment)
+    ih = IssueHandler()
+    handler = CommentHandler(ih.get_issue_path(Issue(args.issue)), args.issue)
+    handler.add_comment(comment)
 
 
 def show(args):
     if args.issue is not None:
-        issue = issue_handler.get_issue(args.issue)
+        handler = IssueHandler()
+        issue = handler.get_issue_from_issue_id(args.issue)
 
         if issue == None:
             print(f"Issue with ID {args.issue} was not found.")
         else:
-            issue_handler.display_issue(issue)
+            handler.display_issue(issue)
     else:
         list(args)
 
@@ -145,7 +153,7 @@ def list(args):
     handler = issue_handler.IssueHandler()
     issues = issue_handler.get_all_issues()
     for i in issues:
-        issue_handler.display_issue(i)
+        handler.display_issue(i)
         print()
 
 
