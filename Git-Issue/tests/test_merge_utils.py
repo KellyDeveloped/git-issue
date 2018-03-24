@@ -2,7 +2,6 @@ import shutil
 import sys
 from pathlib import Path
 
-from git_issue.git_utils.sync_utils import GitSynchronizer
 
 sys.path.append(str(Path(__file__).parent.joinpath("..")))
 
@@ -16,6 +15,7 @@ from git_issue.git_utils.merge_utils import CreateConflictResolver, CreateResolu
     CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver, DivergenceResolutionTool
 from git_issue.issue.tracker import UUIDTrack, Tracker
 from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_utils.sync_utils import GitSynchronizer
 
 import pytest
 
