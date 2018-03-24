@@ -258,7 +258,7 @@ class DivergenceConflictResolver(ConflictResolver):
             div_attr = getattr(diverged, d)
             cur_attr = getattr(current, d)
 
-            if div_attr != cur_attr:
+            if div_attr != cur_attr and div_attr != "id":
                 diff.append((d, div_attr, cur_attr))
 
         return diff
