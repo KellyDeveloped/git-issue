@@ -43,6 +43,7 @@
     <Compile Include="git_issue\git_utils\merge_utils.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="git_issue\git_utils\sync_utils.py" />
     <Compile Include="git_issue\git_utils\__init__.py">
       <SubType>Code</SubType>
     </Compile>

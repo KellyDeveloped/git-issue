@@ -3,12 +3,19 @@ from pathlib import Path
 
 sys.path.append(str(Path(__file__).parent.joinpath("..")))
 import pytest
-import inspect
+import git
+import os
 import git_issue.issue.handler as handler
+from git_issue.issue.handler import IssueHandler
 from git_issue.git_manager import GitManager
 from git_issue.issue.tracker import Tracker
 from git_issue.issue.issue import Issue
 from git_issue.utils.json_utils import JsonConvert
+
+try:
+    from mock import MagicMock
+except ImportError:
+    from unittest.mock import MagicMock
 
 @pytest.fixture
 def tracker(monkeypatch):
@@ -65,23 +72,26 @@ def create_tmp_file(dir, issue):
         def exists(any=None):
             return True
     
-    new_dir = dir.mkdir(issue.id).join("issue.json")
-    new_dir.parent = FakeParent()
+    new_dir = Path(dir).joinpath(f"{issue.id}/issue.json")
     JsonConvert.ToFile(issue, new_dir)
 
     return new_dir
 
-def mock_git():
-    def fake_method(*nargs):
-        return
+@pytest.fixture
+def test_repo(tmpdir):
+    repo = git.Repo.init(tmpdir.mkdir("test_repo"))
 
+    fake_file_dir = Path(repo.working_dir + "/fake-file.pla")
+    open(fake_file_dir, 'w').close()
+    repo.index.add([str(fake_file_dir)])
+    repo.index.commit("Blah")
+
+    os.chdir(repo.working_dir)
     gm = GitManager()
-    methods = inspect.getmembers(gm, predicate=inspect.ismethod)
+    setattr(gm, "get_choice_from_user", lambda x: True)
+    gm.load_issue_branch()
 
-    for m in methods:
-        if m[0] != "perform_git_workflow":
-            setattr(GitManager, m[0], fake_method)
-
+    return repo
 
 def test_tracker_increment(tracker):
     handler._increment_issue_count()
@@ -90,40 +100,41 @@ def test_tracker_increment(tracker):
 def test_id_generation(tracker):
     assert handler.generate_issue_id() == f"{tracker.ISSUE_IDENTIFIER}-{tracker.issue_count + 1}"
 
-def test_store_issue_stores_file(json, regular_issue):
-    mock_git()
-    handler.store_issue(regular_issue, None)
-    assert json.has_to_file_been_called
+def test_store_issue_stores_file(regular_issue, test_repo):
+    ih = IssueHandler()
+    ih.store_issue(regular_issue, None, True)
+    result = ih.get_issue_from_issue_id(regular_issue.id)
+    regular_issue.id = "ISSUE-11" # 11 because tracker is mocked to have 10 entries
 
-def test_store_issue_has_correct_path(monkeypatch, json, regular_issue):
-    mock_git()
-    root = "/tests"
-    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(root))
-    handler.store_issue(regular_issue, None)
-    assert json.to_file_path == Path(f"/tests/issue/{regular_issue.id}/issue.json")
+    assert regular_issue == result
 
-def test_get_issue(monkeypatch, tmpdir, regular_issue):  
+def test_store_issue_has_correct_path(regular_issue, test_repo):
+    root = f"{test_repo.working_dir}/issue"
+    ih = IssueHandler()
+    ih.store_issue(regular_issue, None)
+    gm = GitManager()
+    gm.load_issue_branch()
+    assert Path(f"{root}/{regular_issue.id}/issue.json").exists()
+
+def test_get_issue(monkeypatch, tmpdir, regular_issue):
     dir = create_tmp_file(tmpdir, regular_issue)
 
-    mock_git()
     monkeypatch.setattr("pathlib.Path.joinpath", lambda x, y: Path(dir))
 
     result = handler.get_issue(regular_issue.id)
     assert regular_issue.id == result.id
 
 
-def test_get_all_issues(monkeypatch, tmpdir, regular_issue):
+def test_get_all_issues(monkeypatch, tmpdir, regular_issue, test_repo):
     expected = [regular_issue, Issue("ISSUE-NA")]
-
-    mock_git()
 
     dirs = []
     tmpdir.mkdir("/issue")
-    dirs.append(create_tmp_file(tmpdir + "/issue", expected[0]))
-    dirs.append(create_tmp_file(tmpdir + "/issue", expected[1]))
+    root = f"{test_repo.working_dir}/issue"
+    dirs.append(create_tmp_file(root, expected[0]))
+    dirs.append(create_tmp_file(root, expected[1]))
     
     print(dirs)
-    monkeypatch.setattr("pathlib.Path.cwd", lambda : Path(tmpdir + "/issue"))
     
     result = handler.get_all_issues()
 

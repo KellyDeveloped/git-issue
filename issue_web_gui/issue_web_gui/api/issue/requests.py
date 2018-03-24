@@ -18,7 +18,7 @@ from .schemas import IssueSchema, issue_create_fields, issue_fields, GitUserSche
     to_payload, IssueListSchema, issue_payload, issue_list_payload
 
 import git_issue.issue.handler as handler
-from git_issue.issue import Issue, status_indicators
+from git_issue.issue.issue import Issue, status_indicators
 from git_issue.comment import Comment
 from git_issue.gituser import GitUser
 
@@ -45,6 +45,7 @@ class IssueListAPI(Resource):
     def get(self, args):
         page = args.get("page", 1)
         limit = args.get("limit", 10)
+
 
         issues, count = handler.get_issue_range(page, limit)
         response = IssueList(count, issues)
