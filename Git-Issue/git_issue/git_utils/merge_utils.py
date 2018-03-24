@@ -297,10 +297,10 @@ class DivergenceConflictResolver(ConflictResolver):
             loaded_stage_2 = handler.get_issue_from_uuid(stage_2.uuid)
             loaded_stage_3 = handler.get_issue_from_uuid(stage_3.uuid)
 
-            if loaded_stage_2 is not None:
+            if loaded_stage_2 is not None and loaded_stage_2.id != stage_2.id:
                 matching_issues.append((stage_2, loaded_stage_2))
                 resolved_issues.append(stage_3)
-            elif loaded_stage_3 is not None:
+            elif loaded_stage_3 is not None and loaded_stage_3.id != stage_3.id:
                 matching_issues.append((stage_3, loaded_stage_3))
                 resolved_issues.append(stage_2)
             else:

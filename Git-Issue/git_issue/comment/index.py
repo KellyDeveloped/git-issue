@@ -1,4 +1,6 @@
 from pathlib import Path
+from typing import List
+
 from git_issue.utils.json_utils import JsonConvert
 from git_issue.git_manager import GitManager
 
@@ -25,7 +27,7 @@ class IndexEntry(object):
 class Index(object):
     """This is an index register of all comments for an issue. It keeps track of all files and their creation date."""
 
-    def __init__(self, entries: [IndexEntry] = None):
+    def __init__(self, entries: List[IndexEntry] = None):
         self.entries = entries if entries is not None else []
 
     def has_entry(self, path: Path):
