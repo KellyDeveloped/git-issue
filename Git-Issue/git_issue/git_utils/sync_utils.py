@@ -4,6 +4,7 @@ from git import GitCommandError
 from git_issue.git_manager import GitManager
 from git_issue.git_manager import RepoHandler
 from git_issue.git_utils.merge_utils import GitMerge, CreateConflictResolver
+from git_issue.issue.tracker import Tracker
 
 
 class GitSynchronizer(object):
@@ -41,9 +42,11 @@ class GitSynchronizer(object):
         create_resolution = create_resolver.generate_resolution()
         create_resolution.resolve()
 
+        tracker = create_resolution.tracker if create_resolution.tracker.issue_count != 0 else Tracker.obtain_tracker()
+
         divergence_resolver = merger.produce_create_edit_divergence_resolver(conflicts,
                                                                              create_resolution.resolved_issues,
-                                                                             create_resolution.tracker)
+                                                                             tracker)
         divergence_resolution = divergence_resolver.generate_resolution()
         divergence_resolution.resolve()
 

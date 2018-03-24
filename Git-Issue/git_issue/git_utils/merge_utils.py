@@ -4,6 +4,7 @@ from enum import Enum
 from abc import ABC, abstractmethod
 
 from git import Repo
+from json import JSONDecodeError
 from pathlib import Path
 from typing import List
 
@@ -87,7 +88,8 @@ class CreateResolutionTool(ResolutionTool):
             JsonConvert.ToFile(issue, file_path)
             paths.append(str(file_path))
 
-        self.tracker.store_tracker()
+        if len(self.resolved_issues) > 0:
+            self.tracker.store_tracker()
 
         repo = gm.obtain_repo()
         for path in paths:
@@ -108,7 +110,7 @@ class CommentIndexResolutionTool(ResolutionTool):
 
 class DivergenceResolutionTool(ResolutionTool):
 
-    def __init__(self, resolved_issues: [Issue]):
+    def __init__(self, resolved_issues: List[Issue]):
         self.resolved_issues = resolved_issues
 
     def resolve(self):
@@ -294,8 +296,19 @@ class DivergenceConflictResolver(ConflictResolver):
         handler = IssueHandler(self.resolved_tracker)
 
         for stage_2, stage_3 in diverged_issues:
-            loaded_stage_2 = handler.get_issue_from_uuid(stage_2.uuid)
-            loaded_stage_3 = handler.get_issue_from_uuid(stage_3.uuid)
+            loaded_stage_2 = None
+            loaded_stage_3 = None
+
+            # If it fails then it means the JSON is garbled with Git merge stuff. That or it's just messed up...
+            # Either way, it's a fail.
+            try:
+                loaded_stage_2 = handler.get_issue_from_uuid(stage_2.uuid)
+            except JSONDecodeError:
+                pass
+            try:
+                loaded_stage_3 = handler.get_issue_from_uuid(stage_3.uuid)
+            except JSONDecodeError:
+                pass
 
             if loaded_stage_2 is not None and loaded_stage_2.id != stage_2.id:
                 matching_issues.append((stage_2, loaded_stage_2))

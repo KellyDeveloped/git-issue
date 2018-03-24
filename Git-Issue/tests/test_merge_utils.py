@@ -1,6 +1,9 @@
 import shutil
 import sys
 from pathlib import Path
+
+from git_issue.git_utils.sync_utils import GitSynchronizer
+
 sys.path.append(str(Path(__file__).parent.joinpath("..")))
 
 import os
@@ -309,10 +312,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     result = merge(second_repo)
     expected = [ConflictInfo("ISSUE-1/issue.json", [issue_1, issue_2])]
     assert expected == result
-    resolver = GitMerge(second_repo).produce_create_resolver(result)
-    resolution = resolver.generate_resolution()
-    resolution.resolve()
-    second_repo.git.commit("-m", "merge conflict resolution")
+    GitSynchronizer().merge(GitMerge(second_repo))
 
     # Set up first repo for divergence conflict
     os.chdir(first_repo.working_dir)
@@ -324,9 +324,8 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     result = merge(second_repo)
     expected = [ConflictInfo("ISSUE-1/issue.json", [issue_2, issue_1, issue_2_copy])]
     assert expected == result
-    resolver = GitMerge(second_repo).produce_create_edit_divergence_resolver(result, resolution.resolved_issues, resolution.tracker)
-    resolver.generate_resolution().resolve()
-    second_repo.git.commit("-m", "merge conflict resolution")
+    GitSynchronizer().merge(GitMerge(second_repo))
+
 
     # Comment
     os.chdir(first_repo.working_dir)
@@ -346,10 +345,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
 
     assert expected == result
-    resolvers = GitMerge(second_repo).produce_comment_index_resolvers(result)
-    for resolver in resolvers:
-        resolver.generate_resolution().resolve()
-    second_repo.git.commit("-m", "merge conflict resolution")
+    GitSynchronizer().merge(GitMerge(second_repo))
 
     # Edit conflict
     issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
@@ -378,3 +374,4 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
 
     expected = [ConflictInfo("ISSUE-10/issue.json", [issue_1, issue_1_second_repo, issue_1_first_repo])]
     assert expected == result
+    GitSynchronizer().merge(GitMerge(second_repo))

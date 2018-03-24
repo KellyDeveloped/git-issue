@@ -113,7 +113,7 @@ class IssueHandler(object):
 
         return exists
 
-    def get_issue_range(page: int = 1, limit: int = 10):
+    def get_issue_range(self, page: int = 1, limit: int = 10):
         gm = GitManager()
 
         def action():
@@ -138,7 +138,8 @@ def _increment_issue_count():
 def _generate_issue_folder_path(id):
     dir = Path.cwd()
 
-    if dir.parts[-1] != "issue":
+    gm = GitManager()
+    if dir.parts[-1] != "issue" and gm.is_worktree():
         dir = dir.joinpath("issue")
 
     return dir.joinpath(id)

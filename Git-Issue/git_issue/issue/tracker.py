@@ -37,7 +37,8 @@ class Tracker(object):
             if tracked.uuid == uuid:
                 tracked.issue = issue
                 return
-        
+
+        self.increment_issue_count()
         self.tracked_uuids.append(UUIDTrack(uuid, issue))
 
     def get_issue_from_uuid(self, uuid):
