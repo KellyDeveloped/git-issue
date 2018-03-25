@@ -73,7 +73,7 @@ class IssueHandler(object):
 
         return file
 
-    def display_issue(issue, with_comments=False):
+    def display_issue(self, issue, with_comments=False):
         print (f"Issue ID:\t{issue.id}")
         print (f"Summary:\t{issue.summary}")
         print (f"Description:\t{issue.description}")
