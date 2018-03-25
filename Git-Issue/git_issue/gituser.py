@@ -30,7 +30,7 @@ class GitUser(object):
 
     @staticmethod
     def from_email(email):
-        repo = GitManager()
+        repo = GitManager.obtain_repo()
         
         #repo.git.shortlog(se)...
 
@@ -38,7 +38,7 @@ class GitUser(object):
             analyse the shortlog. The command "git shortlog -se" will give all
             contributors names and email addresses in the format of:
             1\tUser <email>\n - and repeats like this until the end."""
-        shortlog = repo.perform_git_workflow(lambda: GitManager.obtain_repo().git.shortlog("-se"))
+        shortlog = repo.git.shortlog("-se")
         if shortlog != "":
             for line in shortlog.split("\n"):
                 str = line.split("\t")[1]
