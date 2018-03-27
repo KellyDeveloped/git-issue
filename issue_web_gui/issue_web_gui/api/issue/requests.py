@@ -4,6 +4,7 @@ Routes and views for the flask application.
 from flask_restplus import Resource
 
 from git_issue.comment.handler import CommentHandler
+from git_issue.git_manager import GitManager
 from git_issue.issue.handler import IssueHandler
 from issue_web_gui.api import api
 from flask import render_template, request, abort
@@ -20,7 +21,7 @@ from issue_web_gui.api.issue.schemas import comment_list_payload, comment_payloa
 from .schemas import IssueSchema, issue_create_fields, issue_fields, GitUserSchema, CommentSchema, comment_fields, \
     to_payload, IssueListSchema, issue_payload, issue_list_payload
 
-import git_issue.issue.handler as handler
+from git_issue.issue.handler import IssueHandler
 from git_issue.issue.issue import Issue, status_indicators
 from git_issue.comment import Comment
 from git_issue.gituser import GitUser
@@ -47,9 +48,9 @@ class IssueListAPI(Resource):
     @api.response(200, 'Success', issue_list_payload)
     def get(self, args):
         page = args.get("page", 1)
-        limit = args.get("limit", 10)
+        limit = 1000 # args.get("limit", 1000)
 
-
+        handler = IssueHandler()
         issues, count = handler.get_issue_range(page, limit)
         response = IssueList(count, issues)
 
@@ -66,15 +67,18 @@ class IssueListAPI(Resource):
         issue = Issue()
         issue.summary = json.get("summary")
         issue.description = json.get("description")
-        issue.reporter = GitUser(json.get("reporter")) if json.get("reporter") is not None else GitUser()
-        issue.assignee = GitUser(json.get("assignee")) if json.get("assignee") is not None else None
+        reporter = json.get("reporter")
+        assignee = json.get("assignee")
+        issue.reporter = GitUser(email=reporter.get("email")) if reporter is not None else GitUser()
+        issue.assignee = GitUser(email=assignee.get("email")) if assignee is not None else None
         
         issue.subscribers.append(issue.reporter)
         if issue.assignee is not None and issue.assignee not in issue.subscribers:
             issue.subscribers.append(issue.assignee)
 
-        handler = IssueHandler()
-        created_issue = handler.store_issue(issue, "create", generate_id=True)
+        gm = GitManager()
+        handler = gm.perform_git_workflow(lambda: IssueHandler())
+        created_issue = handler.store_issue(issue, "create", generate_id=True, store_tracker=True)
         result = to_payload(GitUser(), issue, IssueSchema)
 
         return result.data, HTTPStatus.CREATED, {'location': f'issues/${created_issue.id}'}
@@ -87,10 +91,11 @@ class IssueAPI(Resource):
     @api.doc(description="Retrieves a single issue that matches the given ID")
     @api.response(200, 'Success', issue_payload)
     def get(self, id):
+        handler = IssueHandler()
         if (not handler.does_issue_exist(id)):
             abort(HTTPStatus.NOT_FOUND)
-        
-        issue = handler.get_issue(id)
+
+        issue = handler.get_issue_from_issue_id(id)
         result = to_payload(GitUser(), issue, IssueSchema)
         return result.data
 
@@ -123,7 +128,7 @@ class IssueAPI(Resource):
             httpStatus = HTTPStatus.CREATED
 
         else:
-            current_issue = handler.get_issue(id)
+            current_issue = handler.get_issue_from_issue_id(id)
 
             if (updated_issue.id != id):
                 return "Given issue ID does not match url", 416
@@ -146,17 +151,22 @@ class CommentListAPI(Resource):
     @api.param('limit', 'The amount of comments per page. Default limit of comments is 10.')
     @api.response(200, 'Success', comment_list_payload)
     def get(self, args, id):
-        if (not handler.does_issue_exist(id)):
+        issue_handler = IssueHandler()
+        if not issue_handler.does_issue_exist(id):
             raise BadRequest(f"Issue with id {id} does not exist.")
         
         page = args.get("page", 1)
-        limit = args.get("limit", 10)
+        limit = 1000 # args.get("limit", 10)
         
         # Each page is limit amount of comments, therefore start_pos
         # is the limit of comments per page, times by the page number
         start_pos = limit * (page - 1)
-
-        comments = handler.get_comment_range(id, limit, start_pos)
+        gm = GitManager()
+        def action():
+            path = issue_handler.get_issue_folder_path(id)
+            comment_handler = CommentHandler(path, id)
+            return comment_handler.get_comment_range(limit, start_pos)
+        comments = gm.perform_git_workflow(action)
         schema = CommentSchema()
         result = schema.dump(comments, many=True)
 
@@ -166,7 +176,9 @@ class CommentListAPI(Resource):
     @api.param('payload', 'The comment to be added')
     @api.response(201, 'Created', comment_response_fields)
     def post(self, id):
-        if (not handler.does_issue_exist(id)):
+        ih = IssueHandler()
+
+        if (not ih.does_issue_exist(id)):
             raise BadRequest(f"Issue with id {id} does not exist.")
         
         comment = request.get_json().get("comment")
@@ -175,8 +187,9 @@ class CommentListAPI(Resource):
             raise BadRequest(f"No comment given.")
 
         comment = Comment(comment)
-        ih = IssueHandler()
-        handler = CommentHandler(ih.get_issue_path(Issue(id)), id)
+        gm = GitManager()
+        path = gm.perform_git_workflow(lambda: ih.get_issue_folder_path(id))
+        handler = CommentHandler(path, id)
         created_comment = handler.add_comment(comment)
         
         schema = CommentSchema()

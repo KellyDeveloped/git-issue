@@ -1,4 +1,4 @@
-import uuid
+from uuid import uuid4
 from git_issue.gituser import GitUser
 from git_issue.utils.json_utils import JsonConvert
 from git_issue.utils import date_utils
@@ -8,11 +8,11 @@ from git_issue.utils import date_utils
 class Issue(object):
     """This class encapsulates what an issue is, and may provide supporting methods for issues."""
 
-    def __init__(self, id:str=None, date=date_utils.get_date_now(), uuid=uuid.uuid4().int, summary:str=None,
+    def __init__(self, id:str=None, date=date_utils.get_date_now(), uuid=None, summary:str=None,
                 description:str=None, status:str="open", assignee:GitUser=None,
                 reporter:GitUser=None, subscribers=[], attachments=[]):
         self.id = id
-        self.uuid = uuid
+        self.uuid = uuid if uuid is not None else uuid4().int
         self.date = date
         self.summary = summary
         self.description = description

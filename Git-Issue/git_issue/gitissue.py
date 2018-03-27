@@ -84,15 +84,15 @@ def create(args):
     issue.subscribers.append(GitUser())
 
     def operation():
-        handler = IssueHandler()
-        new_issue = handler.store_issue(issue, "creation", True)
+        handler = GitManager().perform_git_workflow(lambda: IssueHandler())
+        new_issue = handler.store_issue(issue, "creation", True, True)
         print(f"ID of newly created issue: {new_issue.id}")
 
     confirm_operation(issue, operation)
 
 
 def edit(args):
-    handler = IssueHandler()
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
     if not handler.does_issue_exist(args.issue):
         print("Error: Issue does not exist")
         return
@@ -116,7 +116,7 @@ def edit(args):
 
 
 def change_status(issue_id, status):
-    handler = issue_handler.IssueHandler()
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
 
     if not handler.does_issue_exist(issue_id):
         print("Error: Issue does not exist")
@@ -130,15 +130,20 @@ def change_status(issue_id, status):
 
 
 def comment(args):
-    comment = Comment(args.comment)
-    ih = IssueHandler()
-    handler = CommentHandler(ih.get_issue_path(Issue(args.issue)), args.issue)
-    handler.add_comment(comment)
+    ih = GitManager().perform_git_workflow(lambda: IssueHandler())
+    handler = GitManager().perform_git_workflow(lambda: CommentHandler(ih.get_issue_folder_path(args.issue), args.issue))
 
+    if args.comment:
+        c = Comment(args.comment)
+        handler.add_comment(c)
+    else:
+        comments = GitManager().perform_git_workflow(lambda: handler.get_comment_range(10000, 0))
+        for c in comments:
+            print(f"Email: {c.user.email}\tDate: {c.date}\n\t{c.comment}\n")
 
 def show(args):
     if args.issue is not None:
-        handler = IssueHandler()
+        handler = GitManager().perform_git_workflow(lambda: IssueHandler())
         issue = handler.get_issue_from_issue_id(args.issue)
 
         if issue == None:
@@ -150,7 +155,7 @@ def show(args):
 
 
 def list(args):
-    handler = issue_handler.IssueHandler()
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
     issues = issue_handler.get_all_issues()
     for i in issues:
         handler.display_issue(i)
@@ -206,8 +211,10 @@ editParser.add_argument('--reporter', '-r', help='This person will be notified w
 editParser.add_argument('--status', help='The current status for this project')
 editParser.set_defaults(func=edit)
 
-commentParser.add_argument('--issue', '-i', help='The issue to add a comment to', required=True)
-commentParser.add_argument('--comment', '-c', help='The comment to be added to the issue', required=True)
+commentParser.add_argument('--issue', '-i', help='The issue to retrieve comments from, or add comments to.', required=True)
+commentGroup = commentParser.add_mutually_exclusive_group(required=True)
+commentGroup.add_argument('--comment', '-c', help='The comment to be added to the issue')
+commentGroup.add_argument('--list', '-l', help='Lists all comments for the issue.', action='store_true')
 commentParser.set_defaults(func=comment)
 
 showParser.add_argument('--issue', '-i', help='Displays the given issue.')

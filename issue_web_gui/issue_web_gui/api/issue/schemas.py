@@ -1,7 +1,7 @@
 from marshmallow import Schema, fields, post_load
 from flask_restplus import fields as rfields
 from issue_web_gui.api import api
-from git_issue.issue import Issue
+from git_issue.issue.issue import Issue
 
 from git_issue.gituser import GitUser
 

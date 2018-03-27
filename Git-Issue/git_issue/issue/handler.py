@@ -35,17 +35,22 @@ class IssueHandler(object):
     def get_issue_path(self, issue: Issue):
         return self._generate_issue_file_path(issue.id)
 
-    def store_issue(self, issue, cmd, generate_id=False):
+    def get_issue_folder_path(self, id):
+        return self._generate_issue_folder_path(id)
+
+    def store_issue(self, issue, cmd, generate_id=False, store_tracker=False):
         def gen_paths():
             return [str(self._generate_issue_file_path(issue.id))]
     
         def action():
             if generate_id:
                 issue.id = self.generate_issue_id()
-                self.tracker.increment_issue_count()
 
             JsonConvert.ToFile(issue, self._generate_issue_file_path(issue.id))
             self.tracker.track_or_update_uuid(issue.uuid, issue.id)
+
+            if store_tracker:
+                self.tracker.store_tracker()
 
             return issue
 
