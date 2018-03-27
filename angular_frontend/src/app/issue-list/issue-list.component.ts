@@ -27,7 +27,7 @@ export class IssueListComponent implements OnInit {
 	}
 
 	ngOnInit() {
-		this.cacheService.getPage(1, 10).subscribe(res => {
+		this.cacheService.getPage(1, 1000).subscribe(res => {
 			this.page = res;
 			console.log(this.page);
 		}, err => {

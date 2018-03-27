@@ -39,8 +39,8 @@ commentParser = subparser.add_parser('comment', help='Add a comment an existing 
 showParser = subparser.add_parser('show', help="""Show the information for a given issue.
         If no issue is given, a list of issues will be shown as if you called the "list" command.""")
 listParser = subparser.add_parser('list', help='List known issues.')
-subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
-unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
+# subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
+# unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
 
 # Synchronisation parsers
 pushParser = subparser.add_parser('push', help='Push the issue branch to its remote.')
@@ -222,11 +222,11 @@ showParser.set_defaults(func=show)
 
 listParser.set_defaults(func=list)
 
-subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
-subscribeParser.set_defaults(func=subscribe)
-
-unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.', required=True)
-unsubscribeParser.set_defaults(func=unsubscribe)
+# subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
+# subscribeParser.set_defaults(func=subscribe)
+#
+# unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.', required=True)
+# unsubscribeParser.set_defaults(func=unsubscribe)
 
 openIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Open"))
 closeIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Closed"))
@@ -238,7 +238,7 @@ pushParser.set_defaults(func=push)
 mergeParser.set_defaults(func=merge)
 
 args = parser.parse_args()
-if args.func:
+if hasattr(args, "func"):
     args.func(args)
 else:
     print("Command not recognised. Try --help or -h to view a list of accepted commands.")
