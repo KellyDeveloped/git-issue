@@ -1,9 +1,9 @@
 from marshmallow import Schema, fields, post_load
 from flask_restplus import fields as rfields
 from issue_web_gui.api import api
-from issue import Issue
+from git_issue.issue.issue import Issue
 
-from gituser import GitUser
+from git_issue.gituser import GitUser
 
 class GitUserSchema(Schema):
     user = fields.Str()
@@ -28,8 +28,8 @@ class IssueSchema(Schema):
     reporter = fields.Nested(GitUserSchema, allow_none=True)
     subscribers = fields.Nested(GitUserSchema, many=True)
 
-    edit_fields = {
-            'id' : rfields.String,
+    issue_fields = {
+            'id': rfields.String,
             'summary': rfields.String(required=True),
             'description': rfields.String,
             'status': rfields.String(required=True),
@@ -50,7 +50,7 @@ class IssueSchema(Schema):
         return Issue(**data)
 
 issue_create_fields = api.model('Create Issue', IssueSchema.create_fields)
-issue_edit_fields = api.model('Edit Issue', IssueSchema.edit_fields) 
+issue_fields = api.model('Issue', IssueSchema.issue_fields)
 
 class IssueListSchema(Schema):
 
@@ -67,8 +67,15 @@ class CommentSchema(Schema):
             'comment': rfields.String
         }
 
-comment_fields = api.model('Comment', CommentSchema.create_fields)
+    comment_fields = {
+        'comment': rfields.String,
+        'user': rfields.Nested(git_user_fields),
+        'date': rfields.String,
+        'uuid': rfields.String
+    }
 
+comment_fields = api.model('Comment', CommentSchema.create_fields)
+comment_response_fields = api.model('Comments', CommentSchema.comment_fields)
 class Payload(object):
 
     def __init__(self, user: GitUser, payload):
@@ -83,3 +90,17 @@ def to_payload(current_user, obj, schema_type: Schema, many=False):
     ps = PayloadSchema()
     #{ "user": gu, "payload": obj}
     return ps.dump(Payload(current_user, obj))
+
+
+def _generate_payload_doc(payload, is_list=False):
+    payload_item = rfields.List(rfields.Nested(payload)) if is_list else rfields.Nested(payload)
+    model = {
+        'payload': payload_item,
+        'user': rfields.Nested(git_user_fields)
+    }
+    return api.model('Payload', model)
+
+issue_payload = _generate_payload_doc(issue_fields)
+issue_list_payload = _generate_payload_doc(issue_fields, True)
+comment_payload = _generate_payload_doc(comment_response_fields)
+comment_list_payload = _generate_payload_doc(comment_response_fields, True)

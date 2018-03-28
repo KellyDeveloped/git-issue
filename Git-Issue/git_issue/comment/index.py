@@ -1,6 +1,8 @@
 from pathlib import Path
-from utils.json_utils import JsonConvert
-from git_manager import GitManager
+from typing import List
+
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_manager import GitManager
 
 
 @JsonConvert.register
@@ -25,7 +27,7 @@ class IndexEntry(object):
 class Index(object):
     """This is an index register of all comments for an issue. It keeps track of all files and their creation date."""
 
-    def __init__(self, entries: [IndexEntry] = None):
+    def __init__(self, entries: List[IndexEntry] = None):
         self.entries = entries if entries is not None else []
 
     def has_entry(self, path: Path):
@@ -62,7 +64,6 @@ class Index(object):
 
     def store_index(self, issue_id):
         loc = self._generate_index_path(Path(issue_id)) if issue_id is not None else self._path_to_index
-        print(self)
         JsonConvert.ToFile(self, loc)
         gm = GitManager()
         gm.add_to_index([str(loc)])

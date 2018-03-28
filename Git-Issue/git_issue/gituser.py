@@ -1,5 +1,5 @@
-from git_manager import GitManager
-from utils.json_utils import JsonConvert
+from git_issue.git_manager import GitManager
+from git_issue.utils.json_utils import JsonConvert
 import os
 
 @JsonConvert.register
@@ -39,12 +39,12 @@ class GitUser(object):
             contributors names and email addresses in the format of:
             1\tUser <email>\n - and repeats like this until the end."""
         shortlog = repo.git.shortlog("-se")
-
-        for line in shortlog.split("\n"):
-            str = line.split("\t")[1]
-            temp = str.split(" <")
-            if (temp[1].replace(">", "") == email):
-                return GitUser(temp[0], email)
+        if shortlog != "":
+            for line in shortlog.split("\n"):
+                str = line.split("\t")[1]
+                temp = str.split(" <")
+                if (temp[1].replace(">", "") == email):
+                    return GitUser(temp[0], email)
 
         return None
 

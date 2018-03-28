@@ -1,6 +1,6 @@
-from gituser import GitUser
-from utils import date_utils
-from utils.json_utils import JsonConvert
+from git_issue.gituser import GitUser
+from git_issue.utils import date_utils
+from git_issue.utils.json_utils import JsonConvert
 import uuid as unique_identifier
 
 @JsonConvert.register

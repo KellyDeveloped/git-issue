@@ -1,28 +1,30 @@
-<mat-card *ngIf="!showSpinner">
-	<mat-card-title>Create Issue</mat-card-title>
-	<mat-card-content>
-		<form [formGroup]="issueForm" class="container flex-column">
-			<mat-form-field>
-				<input matInput placeholder="Summary" formControlName="summary" />
-				<mat-error *ngIf="issueForm.invalid">{{ getSummaryErrorMessage() }}</mat-error>
-			</mat-form-field>
+<div class="container flex-justify-center" >
+	<mat-card *ngIf="!showSpinner" style="width:1000px">
+		<mat-card-title>Create Issue</mat-card-title>
+		<mat-card-content>
+			<form [formGroup]="issueForm" class="container flex-column">
+				<mat-form-field>
+					<input matInput placeholder="Summary" formControlName="summary" />
+					<mat-error *ngIf="issueForm.invalid">{{ getSummaryErrorMessage() }}</mat-error>
+				</mat-form-field>
 
-			<mat-form-field>
-				<textarea matInput placeholder="Description" formControlName="description"></textarea>
-			</mat-form-field>
+				<mat-form-field>
+					<textarea matInput placeholder="Description" formControlName="description"></textarea>
+				</mat-form-field>
 
-			<mat-form-field>
-				<input matInput placeholder="Assignee" formControlName="assignee" />
-			</mat-form-field>
+				<mat-form-field>
+					<input matInput placeholder="Assignee" formControlName="assignee" />
+				</mat-form-field>
 
-			<mat-form-field>
-				<input matInput placeholder="Reporter" formControlName="reporter" />
-			</mat-form-field>
-		</form>
+				<mat-form-field>
+					<input matInput placeholder="Reporter" formControlName="reporter" />
+				</mat-form-field>
+			</form>
 
-		<button mat-button color="primary" type="submit" (click)="submit()" [disabled]="issueForm.invalid">Submit</button>
-	</mat-card-content>
-</mat-card>
+			<button mat-button color="primary" type="submit" (click)="submit()" [disabled]="issueForm.invalid">Submit</button>
+		</mat-card-content>
+	</mat-card>
+</div>
 <div *ngIf="showSpinner" class="container flex-align-center flex-justify-center" style="width:100%; height:50%">
 	<mat-spinner></mat-spinner>
 </div>

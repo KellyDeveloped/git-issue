@@ -1,27 +1,28 @@
 import shutil
 import sys
 from pathlib import Path
-sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
+
+
+sys.path.append(str(Path(__file__).parent.joinpath("..")))
 
 import os
 
-from comment import Comment
-from comment.handler import CommentHandler
-from comment.index import Index, IndexEntry
-from git_manager import GitManager
-from git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
+from git_issue.comment import Comment
+from git_issue.comment.handler import CommentHandler
+from git_issue.comment.index import Index, IndexEntry
+from git_issue.git_manager import GitManager
+from git_issue.git_utils.merge_utils import CreateConflictResolver, CreateResolutionTool, ConflictInfo, ConflictType, GitMerge, \
     CommentIndexConflictResolver, CommentIndexResolutionTool, DivergenceConflictResolver, DivergenceResolutionTool
-from issue.tracker import UUIDTrack, Tracker
-from utils.json_utils import JsonConvert
-
-sys.path.append(str(Path(__file__).parent.joinpath("../git_issue")))
+from git_issue.issue.tracker import UUIDTrack, Tracker
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_utils.sync_utils import GitSynchronizer
 
 import pytest
 
 import git
-from issue.handler import IssueHandler
-from gituser import GitUser
-from issue.issue import Issue
+from git_issue.issue.handler import IssueHandler
+from git_issue.gituser import GitUser
+from git_issue.issue.issue import Issue
 
 
 @pytest.fixture
@@ -128,7 +129,7 @@ def test_create_resolver(issue_1: Issue, issue_2: Issue, monkeypatch, first_repo
     issues = [ConflictInfo("Fake_Path", [issue_1, issue_2])]
 
     os.chdir(first_repo.working_dir)
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
 
     resolver = CreateConflictResolver()
     resolver.conflicts = issues
@@ -150,7 +151,7 @@ def test_create_resolution(issue_1: Issue, issue_2: Issue, monkeypatch, first_re
     issues = [issue_1, issue_2]
 
     os.chdir(first_repo.working_dir)
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
     monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     uuids = [UUIDTrack(issue_1.uuid, issue_1.id), UUIDTrack(issue_2.uuid, issue_2.id)]
@@ -158,6 +159,7 @@ def test_create_resolution(issue_1: Issue, issue_2: Issue, monkeypatch, first_re
     resolution = CreateResolutionTool(issues, Tracker(len(uuids), uuids))
 
     resolution.resolve()
+    GitManager().commit("-m", "merge conflict resolution")
 
     assert issue_1_path.exists()
     assert issue_2_path.exists()
@@ -176,24 +178,24 @@ def test_produce_create_resolver(issue_1: Issue, issue_2: Issue, first_repo):
     assert conflict.type == ConflictType.CREATE
 
     merger = GitMerge(first_repo)
-    result = merger.produce_create_resolver([conflict])
+    tracks = [UUIDTrack(issue.uuid, issue.id) for issue in conflict.conflicts]
+    result = merger.produce_create_resolver([conflict,
+                                             ConflictInfo("Another fake path", [Tracker(len(tracks), tracks)])])
 
     assert 1 == len(result.conflicts) and 2 == len(result.conflicts[0].conflicts)
     assert 2 == len(result.tracker.tracked_uuids) and 2 == result.tracker.issue_count
 
     assert conflict == result.conflicts[0]
-    assert [UUIDTrack(issue.uuid, issue.id) for issue in conflict.conflicts]\
-        == result.tracker.tracked_uuids
+    assert tracks == result.tracker.tracked_uuids
 
 def test_produce_comment_index_resolver(comment_index_conflict, first_repo):
     merger = GitMerge(first_repo)
-    resolver = merger.produce_comment_index_resolver(comment_index_conflict.path, [comment_index_conflict])
-    assert [comment_index_conflict] == resolver.conflicts and comment_index_conflict.path == resolver.path
+    resolver = merger.produce_comment_index_resolvers([comment_index_conflict])
+    assert len(resolver) == 1 and comment_index_conflict == resolver[0].conflict_info
 
 def test_comment_index_resolver(comment_index_conflict, sorted_comment_index):
     resolver = CommentIndexConflictResolver()
-    resolver.conflicts = [comment_index_conflict]
-    resolver.path = "fake_path"
+    resolver.conflict_info = comment_index_conflict
 
     result = resolver.generate_resolution()
     assert sorted_comment_index == result.index
@@ -284,7 +286,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     issue_2_copy = JsonConvert.FromJSON(issue_2_json)
     issue_2_copy.summary = "Edited Summary"
 
-    monkeypatch.setattr("git_manager.GitManager.get_choice_from_user", lambda x, y: True)
+    monkeypatch.setattr("git_issue.git_manager.GitManager.get_choice_from_user", lambda x, y: True)
     monkeypatch.setattr("builtins.input", lambda x: 'Y')
 
     def merge(repo):
@@ -310,9 +312,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     result = merge(second_repo)
     expected = [ConflictInfo("ISSUE-1/issue.json", [issue_1, issue_2])]
     assert expected == result
-    resolver = GitMerge(second_repo).produce_create_resolver(result)
-    resolution = resolver.generate_resolution()
-    resolution.resolve()
+    GitSynchronizer().merge(GitMerge(second_repo))
 
     # Set up first repo for divergence conflict
     os.chdir(first_repo.working_dir)
@@ -324,8 +324,8 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     result = merge(second_repo)
     expected = [ConflictInfo("ISSUE-1/issue.json", [issue_2, issue_1, issue_2_copy])]
     assert expected == result
-    resolver = GitMerge(second_repo).produce_create_edit_divergence_resolver(result, resolution.resolved_issues, resolution.tracker)
-    resolver.generate_resolution().resolve()
+    GitSynchronizer().merge(GitMerge(second_repo))
+
 
     # Comment
     os.chdir(first_repo.working_dir)
@@ -345,8 +345,7 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
     expected = [ConflictInfo("ISSUE-1/index.json", [Index([second_entry]), Index([first_entry])])]
 
     assert expected == result
-    resolver = GitMerge(second_repo).produce_comment_index_resolver("ISSUE-1/index.json", result)
-    resolver.generate_resolution().resolve()
+    GitSynchronizer().merge(GitMerge(second_repo))
 
     # Edit conflict
     issue_1.id = "ISSUE-10" # Just so we don't need to work out the ID
@@ -375,3 +374,4 @@ def test_unmerged_conflicts(issue_1: Issue, issue_2: Issue, issue_3: Issue, firs
 
     expected = [ConflictInfo("ISSUE-10/issue.json", [issue_1, issue_1_second_repo, issue_1_first_repo])]
     assert expected == result
+    GitSynchronizer().merge(GitMerge(second_repo))

@@ -50,7 +50,7 @@ class GitManager(object):
     @classmethod
     def is_inside_branch(cls):
         repo = cls.obtain_repo()
-        return repo.active_branch == cls.ISSUE_BRANCH
+        return repo.active_branch.name == cls.ISSUE_BRANCH
 
     def get_choice_from_user(self, confirm_msg) -> bool:
         create = input(confirm_msg).capitalize()
@@ -191,7 +191,8 @@ class GitManager(object):
 
     def add_to_index(self, paths: [str]):
         repo = self.obtain_repo()
-        repo.index.add(paths)
+        for path in paths:
+            repo.git.add(path)
 
     def push(self):
         repo = self.obtain_repo()
@@ -209,7 +210,7 @@ class GitManager(object):
         if new_branch:
             repo.index.commit(commit_message, parent_commits=None)
         else:
-            repo.index.commit(commit_message)
+            repo.git.commit("-m", commit_message)
 
     def commit_and_push(self, cmd, id):
         repo = self.obtain_repo()
@@ -225,7 +226,8 @@ class GitManager(object):
                              should_push=False,
                              generate_index_paths: Callable[[], list] = None,
                              commit_type: str = None,
-                             commit_id: str = None):
+                             commit_id: str = None,
+                             should_unload=True):
         """
             This executes the typical git workflow:
                 Pull origin/issue;
@@ -257,7 +259,8 @@ class GitManager(object):
             self.add_to_index(paths)
             self.commit(commit_type, commit_id)
 
-        self.unload_issue_branch()
+        if should_unload:
+           self.unload_issue_branch()
 
         #if should_push:
         #    self.push()
@@ -266,4 +269,11 @@ class GitManager(object):
 
     @staticmethod
     def obtain_repo():
-        return git.Repo(os.getcwd(), search_parent_directories=True)
+        return RepoHandler.obtain_repo()
+
+
+class RepoHandler(object):
+
+    @staticmethod
+    def obtain_repo():
+        return git.Repo(str(Path.cwd()), search_parent_directories=True)

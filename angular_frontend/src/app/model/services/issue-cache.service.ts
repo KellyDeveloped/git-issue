@@ -110,12 +110,13 @@ export class IssueCacheService {
 
 		this.issueService.createIssue(issue).subscribe((res) => {
 			this.issues.push(new CacheEntry<Issue>(res.payload));
+			this.countCache = new CacheEntry<number>(this.countCache.entry + 1);
 			this.sortIssues();
 			subject.next(res);
 		}, err => {
 			subject.error(err);
 		});
-		
+
 		return subject;
 	}
 

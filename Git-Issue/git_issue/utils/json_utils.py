@@ -49,7 +49,6 @@ class JsonConvert(object):
     @classmethod
     def _create_dir(clsself, path):
         if (not path.parent.exists()):
-            print(f"{path.parent} does not exist")
             clsself._create_dir(path.parent)
         path.mkdir()
 

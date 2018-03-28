@@ -1,12 +1,24 @@
 #!/usr/bin/env python
 
+import sys
+
+
+sys.path.append(f"{__file__}/../..")
+
+from git_issue.git_utils.merge_utils import GitMerge
+
 import argparse
-import issue.handler as issue_handler
-from issue.issue import Issue
-from gituser import GitUser
-from comment.comment import Comment
+import git_issue.issue.handler as issue_handler
+from git_issue.issue.handler import IssueHandler
+from git_issue.git_manager import GitManager
+from git_issue.issue.issue import Issue
+from git_issue.gituser import GitUser
+from git_issue.comment.comment import Comment
+from git_issue.comment.handler import CommentHandler
 
 # Arguments start here
+from git_issue.git_utils.sync_utils import GitSynchronizer
+
 parser = argparse.ArgumentParser(prog='git issue')
 
 
@@ -27,8 +39,13 @@ commentParser = subparser.add_parser('comment', help='Add a comment an existing 
 showParser = subparser.add_parser('show', help="""Show the information for a given issue.
         If no issue is given, a list of issues will be shown as if you called the "list" command.""")
 listParser = subparser.add_parser('list', help='List known issues.')
-subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
-unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
+# subscribeParser = subparser.add_parser('subscribe', help='Subscribe to an existing issue.')
+# unsubscribeParser = subparser.add_parser('unsubscribe', help='Unsubscribe from an existing issue.')
+
+# Synchronisation parsers
+pushParser = subparser.add_parser('push', help='Push the issue branch to its remote.')
+pullParser = subparser.add_parser('pull', help='Pull from remote issue branch.')
+mergeParser = subparser.add_parser('merge', help='Attempts to resolve any merge conflicts that have arose.')
 
 # status shorthands
 openIssueParser = subparser.add_parser('open', help='Sets the status of the given issue to "Open"')
@@ -42,7 +59,8 @@ inProgressParser.add_argument("issue", nargs=1)
 
 def confirm_operation(issue, operation):
     print("Operation will result in the following issue:\n")
-    issue_handler.display_issue(issue)
+    handler = IssueHandler()
+    handler.display_issue(issue)
     create = input(f"\nConfirm (Y/N): ").capitalize()
 
     while create != "Y" and create != "YES" and create != "N" and create != "NO":
@@ -66,24 +84,26 @@ def create(args):
     issue.subscribers.append(GitUser())
 
     def operation():
-        new_issue = issue_handler.store_issue(issue, "creation", True)
+        handler = GitManager().perform_git_workflow(lambda: IssueHandler())
+        new_issue = handler.store_issue(issue, "creation", True, True)
         print(f"ID of newly created issue: {new_issue.id}")
 
     confirm_operation(issue, operation)
 
 
 def edit(args):
-    if (not issue_handler.does_issue_exist(args.issue)):
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
+    if not handler.does_issue_exist(args.issue):
         print("Error: Issue does not exist")
         return
 
-    issue = issue_handler.get_issue(args.issue)
+    issue = handler.get_issue_from_issue_id(args.issue)
 
     if (issue == None):
         print("There was a problem ")
 
     print("Issue before editing:")
-    issue_handler.display_issue(issue)
+    handler.display_issue(issue)
 
     issue.summary = args.summary if args.summary != None else issue.summary
     issue.description = args.description if args.description != None else issue.description
@@ -92,11 +112,11 @@ def edit(args):
     issue.status = args.status if args.status != None else issue.status
 
     print()
-    confirm_operation(issue, lambda: issue_handler.store_issue(issue, "edit"))
+    confirm_operation(issue, lambda: handler.store_issue(issue, "edit"))
 
 
 def change_status(issue_id, status):
-    handler = issue_handler.IssueHandler()
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
 
     if not handler.does_issue_exist(issue_id):
         print("Error: Issue does not exist")
@@ -110,28 +130,63 @@ def change_status(issue_id, status):
 
 
 def comment(args):
-    comment = Comment(args.comment)
-    issue_handler.add_comment(args.issue, comment)
+    ih = GitManager().perform_git_workflow(lambda: IssueHandler())
+    handler = GitManager().perform_git_workflow(lambda: CommentHandler(ih.get_issue_folder_path(args.issue), args.issue))
 
+    if args.comment:
+        c = Comment(args.comment)
+        handler.add_comment(c)
+    else:
+        comments = GitManager().perform_git_workflow(lambda: handler.get_comment_range(10000, 0))
+        for c in comments:
+            print(f"Email: {c.user.email}\tDate: {c.date}\n\t{c.comment}\n")
 
 def show(args):
     if args.issue is not None:
-        issue = issue_handler.get_issue(args.issue)
+        handler = GitManager().perform_git_workflow(lambda: IssueHandler())
+        issue = handler.get_issue_from_issue_id(args.issue)
 
         if issue == None:
             print(f"Issue with ID {args.issue} was not found.")
         else:
-            issue_handler.display_issue(issue)
+            handler.display_issue(issue)
     else:
         list(args)
 
 
 def list(args):
-    handler = issue_handler.IssueHandler()
+    handler = GitManager().perform_git_workflow(lambda: IssueHandler())
     issues = issue_handler.get_all_issues()
     for i in issues:
-        issue_handler.display_issue(i)
+        handler.display_issue(i)
         print()
+
+
+def push(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.push()
+        sync = None
+    gm = GitManager()
+    gm.perform_git_workflow(action)
+
+
+def pull(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.pull(args.with_merge)
+        sync = None
+    gm = GitManager()
+    gm.perform_git_workflow(action)
+
+def merge(args):
+    def action():
+        sync = GitSynchronizer()
+        sync.merge(GitMerge(sync.repo))
+        sync = None
+    gm = GitManager()
+    gm.perform_git_workflow(action)
+
 
 
 def subscribe(args):
@@ -156,8 +211,10 @@ editParser.add_argument('--reporter', '-r', help='This person will be notified w
 editParser.add_argument('--status', help='The current status for this project')
 editParser.set_defaults(func=edit)
 
-commentParser.add_argument('--issue', '-i', help='The issue to add a comment to', required=True)
-commentParser.add_argument('--comment', '-c', help='The comment to be added to the issue', required=True)
+commentParser.add_argument('--issue', '-i', help='The issue to retrieve comments from, or add comments to.', required=True)
+commentGroup = commentParser.add_mutually_exclusive_group(required=True)
+commentGroup.add_argument('--comment', '-c', help='The comment to be added to the issue')
+commentGroup.add_argument('--list', '-l', help='Lists all comments for the issue.', action='store_true')
 commentParser.set_defaults(func=comment)
 
 showParser.add_argument('--issue', '-i', help='Displays the given issue.')
@@ -165,16 +222,24 @@ showParser.set_defaults(func=show)
 
 listParser.set_defaults(func=list)
 
-subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
-subscribeParser.set_defaults(func=subscribe)
-
-unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.', required=True)
-unsubscribeParser.set_defaults(func=unsubscribe)
+# subscribeParser.add_argument('--issue', '-i', help='The issue to subscribe to.', required=True)
+# subscribeParser.set_defaults(func=subscribe)
+#
+# unsubscribeParser.add_argument('--issue', '-i', help='The issue to unsubscribe from.', required=True)
+# unsubscribeParser.set_defaults(func=unsubscribe)
 
 openIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Open"))
 closeIssueParser.set_defaults(func=lambda x: change_status(x.issue[0], "Closed"))
 inProgressParser.set_defaults(func=lambda x: change_status(x.issue[0], "In Progress"))
 
+pullParser.add_argument('--with-merge', '-m', help='Attempt to resolve merge conflicts that arise', action='store_true')
+pullParser.set_defaults(func=pull)
+pushParser.set_defaults(func=push)
+mergeParser.set_defaults(func=merge)
+
 args = parser.parse_args()
-args.func(args)
+if hasattr(args, "func"):
+    args.func(args)
+else:
+    print("Command not recognised. Try --help or -h to view a list of accepted commands.")
 # Arguments end here

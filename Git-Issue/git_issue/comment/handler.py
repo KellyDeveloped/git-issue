@@ -1,10 +1,11 @@
-import comment.index as index
+from typing import List
+
+import git_issue.comment.index as index
 from pathlib import Path
-from comment.comment import Comment
-from comment.index import IndexEntry
-from utils.json_utils import JsonConvert
-from git_manager import GitManager
-from issue.issue import Issue
+from git_issue.comment.comment import Comment
+from git_issue.comment.index import IndexEntry
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_manager import GitManager
 
 class CommentHandler(object):
     """description of class"""
@@ -57,8 +58,8 @@ class CommentHandler(object):
         entry = self.index.get_entry(self.generate_comment_path(comment_id))
         return self._get_comment(entry)
 
-    def get_comment_range(self, range: int = 10, start_pos: int = 0) -> [Comment]:
-        generator = self.index.generate_range(range)
+    def get_comment_range(self, range: int = 10, start_pos: int = 0) -> List[Comment]:
+        generator = self.index.generate_range(range, start_pos)
         return self._get_list_of_comments(next(generator))
 
     def get_all_comments(self) -> [Comment]:

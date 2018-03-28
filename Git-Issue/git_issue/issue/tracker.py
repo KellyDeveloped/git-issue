@@ -1,6 +1,6 @@
 from pathlib import Path
-from utils.json_utils import JsonConvert
-from git_manager import GitManager
+from git_issue.utils.json_utils import JsonConvert
+from git_issue.git_manager import GitManager
 
 @JsonConvert.register
 class UUIDTrack(object):
@@ -37,7 +37,8 @@ class Tracker(object):
             if tracked.uuid == uuid:
                 tracked.issue = issue
                 return
-        
+
+        self.increment_issue_count()
         self.tracked_uuids.append(UUIDTrack(uuid, issue))
 
     def get_issue_from_uuid(self, uuid):
@@ -67,4 +68,10 @@ class Tracker(object):
             tracker = Tracker()
 
         return tracker
+
+    def __eq__(self, value):
+        if type(value) is Tracker:
+            return self.tracked_uuids == value.tracked_uuids and self.issue_count == value.issue_count
+
+        return False
 
